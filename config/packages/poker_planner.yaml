@@ -1,0 +1,10 @@
+poker_planner:
+  path_prefix: ''
+  mercure_topic_prefix: ''
+  storage:
+    redis_url: '%env(REDIS_URL)%'
+    prefix: poker_planner
+  room:
+    max_ttl_seconds: 14400
+    grace_seconds: 600
+    heartbeat_seconds: 30

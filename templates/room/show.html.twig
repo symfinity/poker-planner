@@ -1,0 +1,64 @@
+{% extends '@SymfinityPokerPlanner/base.html.twig' %}
+
+{% block title %}Room {{ room.id }}{% endblock %}
+
+{% block shell_bar %}{% endblock %}
+
+{% block head %}
+    {{ parent() }}
+    {{ turbo_stream_from(mercure_topic) }}
+{% endblock %}
+
+{% block body %}
+<main
+    class="pp-room"
+    id="poker-room"
+    data-heartbeat-url="{{ path('poker_planner_heartbeat', {uuid: room.id}) }}"
+    data-heartbeat-ms="{{ heartbeat_seconds * 1000 }}"
+    data-share-url="{{ url('poker_planner_room', {uuid: room.id}) }}"
+>
+    <div class="pp-room__chrome">
+        <div class="pp-room__toolbar">
+            <div class="pp-room__toolbar-start">
+                <button type="button" class="pp-share-btn" aria-describedby="pp-share-status">
+                    <span class="pp-share-btn__label">Share link</span>
+                </button>
+                <p id="pp-share-status" class="pp-sr-only" aria-live="polite"></p>
+            </div>
+
+            <h1 class="pp-room__brand">Poker Planner</h1>
+
+            <div class="pp-room__toolbar-end">
+                {% include '@SymfinityPokerPlanner/_scheme_switcher.html.twig' %}
+            </div>
+        </div>
+
+        <header class="pp-room__header">
+            {% if self.isModerator %}
+                <form class="pp-story-form" method="post" action="{{ path('poker_planner_story', {uuid: room.id}) }}" data-turbo="true">
+                    <label class="pp-sr-only" for="story-title-input">Story title</label>
+                    <input id="story-title-input" name="story_title" value="{{ room.storyTitle }}" maxlength="255" placeholder="Story title">
+                    <button type="submit" class="pp-btn pp-btn--ghost pp-btn--small">Update story</button>
+                </form>
+            {% endif %}
+
+            <h2 id="story-title" class="pp-story">{{ room.storyTitle ?: 'Untitled story' }}</h2>
+        </header>
+    </div>
+
+    <section class="pp-room__stage" aria-label="Estimator slots">
+        {% include '@SymfinityPokerPlanner/room/_slot_grid.html.twig' with {participants: participants, phase: phase} %}
+    </section>
+
+    {% include '@SymfinityPokerPlanner/room/_vote_deck.html.twig' with {
+        roomId: room.id,
+        deck: deck,
+        phase: phase,
+        selectedVote: self.voteValue ? self.voteValue.value : null,
+    } %}
+
+    {% if self.isModerator %}
+        {% include '@SymfinityPokerPlanner/room/_moderator_actions.html.twig' with {roomId: room.id, phase: phase} %}
+    {% endif %}
+</main>
+{% endblock %}

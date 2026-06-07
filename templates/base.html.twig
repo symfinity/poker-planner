@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ activeTheme ? activeTheme.id : 'default' }}" data-scheme="{{ colorScheme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>{% block title %}Poker Planner{% endblock %}</title>
+    {% include '@UiKernel/_head.html.twig' %}
+    <link rel="stylesheet" href="{{ asset('styles/poker-planner.css', 'poker_planner') }}">
+    {% block head %}
+        {{ importmap('app') }}
+    {% endblock %}
+</head>
+<body class="pp-body">
+<div class="pp-shell">
+    {% block shell_bar %}
+    <header class="pp-shell__bar">
+        {% include '@SymfinityPokerPlanner/_scheme_switcher.html.twig' %}
+    </header>
+    {% endblock %}
+    {% block body %}{% endblock %}
+</div>
+<script src="{{ asset('js/poker-planner.js', 'poker_planner') }}" defer></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

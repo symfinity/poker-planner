@@ -1,0 +1,4 @@
+# Deprecated: use config/routes/poker_planner_host.yaml (Flex recipe + dogfood overlay).
+# Kept for reference during dogfood migration.
+ui_kernel_theme:
+    resource: '@UiKernelBundle/config/routes.yaml'

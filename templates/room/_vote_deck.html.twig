@@ -1,0 +1,18 @@
+<section id="vote-deck" class="pp-deck{% if phase.value == 'revealed' %} pp-deck--locked{% endif %}" aria-label="Estimation deck">
+    <form id="vote-form" method="post" action="{{ path('poker_planner_vote', {uuid: roomId}) }}" data-turbo="true" data-vote-clear-url="{{ path('poker_planner_vote_clear', {uuid: roomId}) }}">
+        <fieldset class="pp-deck__cards"{% if phase.value == 'revealed' %} disabled{% endif %}>
+            {% for card in deck %}
+                {% set is_selected = selectedVote is defined and selectedVote == card.value %}
+                <button
+                    type="submit"
+                    name="card"
+                    value="{{ card.value }}"
+                    class="pp-deck__card pp-deck__card--{{ card.accent() }}{% if is_selected %} is-picked{% endif %}"
+                    {% if is_selected %}aria-pressed="true"{% endif %}
+                >
+                    <span class="pp-deck__card-value">{{ card.label }}</span>
+                </button>
+            {% endfor %}
+        </fieldset>
+    </form>
+</section>

@@ -1,0 +1,3 @@
+# Theme scheme PATCH (SchemeSwitch enhanced mode) — required by poker-planner layout.
+ui_kernel_theme:
+    resource: '@UiKernelBundle/config/routes.yaml'

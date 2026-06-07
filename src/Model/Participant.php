@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Symfinity\Bundle\PokerPlanner\Model;
+
+final class Participant
+{
+    public function __construct(
+        public readonly string $id,
+        public readonly string $displayName,
+        public readonly bool $isModerator,
+        public bool $hasVoted = false,
+        public ?CardValue $voteValue = null,
+        public int $lastSeenAt = 0,
+    ) {
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromArray(array $data): self
+    {
+        $vote = $data['voteValue'] ?? null;
+
+        return new self(
+            id: (string) $data['id'],
+            displayName: (string) $data['displayName'],
+            isModerator: (bool) ($data['isModerator'] ?? false),
+            hasVoted: (bool) ($data['hasVoted'] ?? false),
+            voteValue: is_string($vote) ? CardValue::from($vote) : null,
+            lastSeenAt: (int) ($data['lastSeenAt'] ?? 0),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'displayName' => $this->displayName,
+            'isModerator' => $this->isModerator,
+            'hasVoted' => $this->hasVoted,
+            'voteValue' => $this->voteValue?->value,
+            'lastSeenAt' => $this->lastSeenAt,
+        ];
+    }
+}

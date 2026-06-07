@@ -1,0 +1,4 @@
+poker_planner:
+  resource: '../src/Controller/'
+  type: attribute
+  prefix: '%poker_planner.path_prefix%'

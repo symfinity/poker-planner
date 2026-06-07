@@ -1,0 +1,27 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  Symfinity\Bundle\PokerPlanner\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/PokerPlannerBundle.php'
+      - '../src/Model/'
+
+  Symfinity\Bundle\PokerPlanner\Service\RoomService:
+    lazy: true
+    arguments:
+      $maxTtlSeconds: '%poker_planner.room.max_ttl_seconds%'
+      $graceSeconds: '%poker_planner.room.grace_seconds%'
+      $heartbeatSeconds: '%poker_planner.room.heartbeat_seconds%'
+
+  Symfinity\Bundle\PokerPlanner\Service\RoomTurboPublisher:
+    lazy: true
+    arguments:
+      $topicPrefix: '%poker_planner.mercure_topic_prefix%'
+
+  Symfinity\Bundle\PokerPlanner\Controller\RoomController:
+    arguments:
+      $heartbeatSeconds: '%poker_planner.room.heartbeat_seconds%'

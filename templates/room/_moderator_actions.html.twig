@@ -1,0 +1,8 @@
+<footer id="moderator-actions" class="pp-room__actions">
+    <form method="post" action="{{ path('poker_planner_restart', {uuid: roomId}) }}" data-turbo="true">
+        <button type="submit" class="pp-btn pp-btn--outline">Restart</button>
+    </form>
+    <form method="post" action="{{ path('poker_planner_reveal', {uuid: roomId}) }}" data-turbo="true">
+        <button type="submit" class="pp-btn pp-btn--reveal"{% if phase.value == 'revealed' %} disabled aria-disabled="true"{% endif %}>Reveal</button>
+    </form>
+</footer>
