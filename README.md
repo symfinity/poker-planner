@@ -16,6 +16,10 @@ Realtime planning-poker rooms for Symfony: hidden votes, Mercure + Turbo Streams
 - `ext-redis` (or dogfood with Redis service)
 - `symfony/mercure-bundle`, `symfony/ux-turbo`
 
+## Homework (corporate)
+
+90–120 min team exercise: [PRODUCT-poker-planner](../../../../classified/explore/PRODUCT-poker-planner.md) — refinement demo without SaaS; exercises Mercure, Turbo, Redis, ui-kernel.
+
 ## Dogfood
 
 From org checkout root:
