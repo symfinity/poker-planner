@@ -42,5 +42,22 @@ final class PublicParticipantViewTest extends TestCase
 
         self::assertSame('½', $view->voteLabel);
         self::assertSame('sky', $view->voteAccent);
+        self::assertNull($view->voteIcon);
+    }
+
+    public function testVoteIconVisibleForPassAndBreak(): void
+    {
+        $pass = PublicParticipantView::fromParticipant(
+            new Participant('p1', 'Ada', false, true, CardValue::Pass),
+            Phase::Revealed,
+        );
+        self::assertNull($pass->voteLabel);
+        self::assertSame('pass', $pass->voteIcon);
+
+        $break = PublicParticipantView::fromParticipant(
+            new Participant('p2', 'Bob', false, true, CardValue::Break),
+            Phase::Revealed,
+        );
+        self::assertSame('coffee', $break->voteIcon);
     }
 }

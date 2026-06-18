@@ -1,0 +1,29 @@
+<ol class="pp-queue-list">
+    {% for item in storyQueue.items %}
+        {% set index = loop.index0 %}
+        <li class="pp-queue-list__item{% if index == storyQueue.currentIndex and not storyQueue.complete %} is-current{% endif %}{% if item.recordedEstimate %} is-done{% endif %}">
+            <span class="pp-queue-list__index" aria-hidden="true">{{ index + 1 }}</span>
+            <span class="pp-queue-list__title" title="{{ item.title }}">{{ item.title }}</span>
+            {% if item.recordedEstimate %}
+                <span class="pp-queue-list__estimate">{{ item.recordedEstimate }}</span>
+            {% endif %}
+            {% if storyQueue.isEditable and (index > storyQueue.currentIndex or (index == storyQueue.currentIndex and not item.recordedEstimate)) %}
+                <form
+                    class="pp-queue-list__remove"
+                    method="post"
+                    action="{{ path('poker_planner_queue_remove', {uuid: roomId}) }}"
+                    data-turbo="true"
+                >
+                    <input type="hidden" name="story_index" value="{{ index }}">
+                    <button type="submit" class="pp-queue-list__remove-btn" aria-label="Remove {{ item.title }}">
+                        <svg class="pp-queue-list__remove-icon" viewBox="0 0 16 16" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M4.25 4.25l7.5 7.5M11.75 4.25l-7.5 7.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </form>
+            {% endif %}
+        </li>
+    {% else %}
+        <li class="pp-queue-list__empty">No stories queued yet.</li>
+    {% endfor %}
+</ol>

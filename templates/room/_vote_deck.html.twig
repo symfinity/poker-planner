@@ -1,6 +1,7 @@
-<section id="vote-deck" class="pp-deck{% if phase.value == 'revealed' %} pp-deck--locked{% endif %}" aria-label="Estimation deck">
+{% set deck_locked = room.storyQueue.complete or (phase.value == 'revealed' and not (room.settings.allowChangeAfterReveal ?? false)) %}
+<section id="vote-deck" class="pp-deck{% if deck_locked %} pp-deck--locked{% endif %}" aria-label="Estimation deck" data-deck-count="{{ deck|length }}">
     <form id="vote-form" method="post" action="{{ path('poker_planner_vote', {uuid: roomId}) }}" data-turbo="true" data-vote-clear-url="{{ path('poker_planner_vote_clear', {uuid: roomId}) }}">
-        <fieldset class="pp-deck__cards"{% if phase.value == 'revealed' %} disabled{% endif %}>
+        <fieldset class="pp-deck__cards"{% if deck_locked %} disabled{% endif %}>
             {% for card in deck %}
                 {% set is_selected = selectedVote is defined and selectedVote == card.value %}
                 <button
@@ -10,7 +11,14 @@
                     class="pp-deck__card pp-deck__card--{{ card.accent() }}{% if is_selected %} is-picked{% endif %}"
                     {% if is_selected %}aria-pressed="true"{% endif %}
                 >
-                    <span class="pp-deck__card-value">{{ card.label }}</span>
+                    <span class="pp-deck__card-value">
+                        {% set icon = card.icon() %}
+                        {% if icon %}
+                            <span class="pp-deck__card-icon">{% include '@SymfinityPokerPlanner/_card_icon.html.twig' with {icon: icon} %}</span>
+                        {% else %}
+                            {{ card.label() }}
+                        {% endif %}
+                    </span>
                 </button>
             {% endfor %}
         </fieldset>

@@ -3,6 +3,18 @@
     "description": "Realtime planning-poker rooms with Mercure sync and hidden votes until reveal",
     "type": "symfony-bundle",
     "license": "MIT",
+    "homepage": "https://github.com/symfinity/poker-planner",
+    "support": {
+        "issues": "https://github.com/symfinity/poker-planner/issues",
+        "source": "https://github.com/symfinity/poker-planner"
+    },
+    "authors": [
+        {
+            "name": "Symfinity",
+            "email": "dev@symfinity.net",
+            "homepage": "https://symfinity.net/"
+        }
+    ],
     "keywords": [
         "symfony",
         "symfony-bundle",
@@ -13,49 +25,34 @@
         "scrum"
     ],
     "require": {
-        "php": ">=8.1",
+        "php": ">=8.2",
         "ext-json": "*",
-        "symfinity/ui-kernel": "@dev",
-        "symfinity/ux-blocks": "@dev",
-        "symfinity/ux-blocks-core": "@dev",
-        "symfony/config": "^6.4||^7.0||^8.0",
-        "symfony/dependency-injection": "^6.4||^7.0||^8.0",
-        "symfony/framework-bundle": "^6.4||^7.0||^8.0",
-        "symfony/http-foundation": "^6.4||^7.0||^8.0",
-        "symfony/http-kernel": "^6.4||^7.0||^8.0",
+        "symfinity/ui-kernel": "^0.1",
+        "symfinity/ux-blocks": "^0.1",
+        "symfinity/ux-blocks-core": "^0.1",
+        "symfony/config": "^7.4||^8.0",
+        "symfony/asset-mapper": "^7.4||^8.0",
+        "symfony/dependency-injection": "^7.4||^8.0",
+        "symfony/framework-bundle": "^7.4||^8.0",
+        "symfony/http-foundation": "^7.4||^8.0",
+        "symfony/http-kernel": "^7.4||^8.0",
         "symfony/mercure-bundle": "^0.3||^0.4",
-        "symfony/routing": "^6.4||^7.0||^8.0",
+        "symfony/routing": "^7.4||^8.0",
         "symfony/stimulus-bundle": "^2.0||^3.0",
-        "symfony/twig-bundle": "^6.4||^7.0||^8.0",
-        "symfony/uid": "^6.4||^7.0||^8.0",
+        "symfony/twig-bundle": "^7.4||^8.0",
+        "symfony/uid": "^7.4||^8.0",
         "symfony/ux-turbo": "^2.0||^3.0",
         "symfony/ux-twig-component": "^2.0||^3.0",
         "twig/twig": "^3.0"
     },
     "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-symfony": "^2.0",
         "phpunit/phpunit": "^10.5||^11.0",
-        "symfony/asset-mapper": "^6.4||^7.0||^8.0",
-        "symfony/browser-kit": "^6.4||^7.0||^8.0",
-        "symfony/css-selector": "^6.4||^7.0||^8.0",
-        "symfony/yaml": "^6.4||^7.0||^8.0"
+        "symfony/browser-kit": "^7.4||^8.0",
+        "symfony/css-selector": "^7.4||^8.0",
+        "symfony/yaml": "^7.4||^8.0"
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../ui-kernel",
-            "options": { "symlink": true }
-        },
-        {
-            "type": "path",
-            "url": "../ux-blocks",
-            "options": { "symlink": true }
-        },
-        {
-            "type": "path",
-            "url": "../ux-blocks-core",
-            "options": { "symlink": true }
-        }
-    ],
     "autoload": {
         "psr-4": {
             "Symfinity\\Bundle\\PokerPlanner\\": "src/"
@@ -66,22 +63,26 @@
             "Symfinity\\Bundle\\PokerPlanner\\Tests\\": "tests/"
         }
     },
+    "config": {
+        "sort-packages": true
+    },
     "scripts": {
-        "test": "phpunit -c phpunit.xml.dist"
+        "test": "phpunit -c phpunit.xml.dist",
+        "phpstan": "phpstan analyse --memory-limit=512M"
     },
     "suggest": {
         "ext-redis": "Native Redis extension (recommended for production)",
-        "predis/predis": "Pure-PHP Redis client for dev/dogfood when ext-redis is unavailable"
+        "predis/predis": "Pure-PHP Redis client when ext-redis is unavailable",
+        "symfony/ux-icons": "App icon and optional glyphs via ux_blocks_icon() (hugeicons:joker)"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "version": "0.1.0-dev",
     "extra": {
         "branch-alias": {
             "dev-main": "0.1.x-dev"
         },
         "symfony": {
-            "require": "^6.4||^7.0||^8.0"
+            "require": "^7.4||^8.0"
         }
     }
 }

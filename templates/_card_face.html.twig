@@ -1,0 +1,11 @@
+{# Shared poker card face — same aspect ratio everywhere (deck, table, settings). #}
+<div class="pp-card-face{% if size is defined and size %} pp-card-face--{{ size }}{% endif %}{% if selectable|default(false) %} pp-card-face--selectable{% endif %} pp-card-accent--{{ card.accent() }}">
+    <div class="pp-card-face__body">
+        {% set icon = card.icon() %}
+        {% if icon %}
+            <span class="pp-card-face__icon">{% include '@SymfinityPokerPlanner/_card_icon.html.twig' with {icon: icon} %}</span>
+        {% else %}
+            <span class="pp-card-face__value">{{ card.label() }}</span>
+        {% endif %}
+    </div>
+</div>

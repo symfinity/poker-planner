@@ -1,0 +1,35 @@
+{% set settings = room.settings %}
+{% set canEdit = isModerator|default(false) %}
+
+<section class="pp-settings-panel" data-settings-panel="room" role="tabpanel" hidden>
+    <h3 class="pp-settings-panel__title">Room info</h3>
+    {% if canEdit %}
+        <form method="post" action="{{ path('poker_planner_save_room', {uuid: room.id}) }}" class="pp-settings-form">
+            <label for="settings-team-name">Team name</label>
+            <input
+                id="settings-team-name"
+                class="pp-field"
+                name="team_name"
+                value="{{ settings.teamName }}"
+                maxlength="64"
+                placeholder="Team name"
+            >
+            <button type="submit" class="pp-corner-btn pp-corner-btn--solid pp-corner-btn--block"{% if settings.teamName == '' %} disabled{% endif %}>Save room</button>
+        </form>
+        <p class="pp-dialog__hint">Saving a room lets you share the same link indefinitely and keeps it from expiring after disuse.</p>
+
+        <div class="pp-settings-danger">
+            <h3 class="pp-settings-panel__title">Danger Zone</h3>
+            <form
+                method="post"
+                action="{{ path('poker_planner_delete_room', {uuid: room.id}) }}"
+                class="pp-settings-form pp-settings-form--danger"
+                onsubmit="return confirm('Delete this room for everyone?');"
+            >
+                <button type="submit" class="pp-corner-btn pp-corner-btn--danger pp-corner-btn--block">Delete room</button>
+            </form>
+        </div>
+    {% else %}
+        <p class="pp-dialog__hint">Only the room creator can save team settings.</p>
+    {% endif %}
+</section>

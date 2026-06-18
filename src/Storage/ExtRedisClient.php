@@ -21,12 +21,14 @@ final class ExtRedisClient implements RedisClientInterface
         $port = (int) ($parts['port'] ?? 6379);
         $this->redis->connect($host, $port);
 
-        if (isset($parts['pass']) && is_string($parts['pass']) && '' !== $parts['pass']) {
-            $this->redis->auth($parts['pass']);
+        $password = $parts['pass'] ?? null;
+        if (is_string($password) && '' !== $password) {
+            $this->redis->auth($password);
         }
 
-        if (isset($parts['path']) && is_string($parts['path']) && '' !== $parts['path'] && '/' !== $parts['path']) {
-            $this->redis->select((int) ltrim($parts['path'], '/'));
+        $path = $parts['path'] ?? null;
+        if (is_string($path) && '' !== $path && '/' !== $path) {
+            $this->redis->select((int) ltrim($path, '/'));
         }
     }
 

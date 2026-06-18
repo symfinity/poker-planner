@@ -8,3 +8,55 @@
         {% include '@SymfinityPokerPlanner/room/_vote_deck.html.twig' %}
     </template>
 </turbo-stream>
+{% if consensus is defined and consensus %}
+    <turbo-stream action="replace" target="consensus-strip">
+        <template>
+            {% include '@SymfinityPokerPlanner/room/_consensus_strip.html.twig' with {
+                consensus: consensus,
+                roundedMedianLabel: roundedMedianLabel|default(null),
+                celebrateConfetti: room.settings.showConfetti and consensus.hasZeroSpread(),
+            } %}
+        </template>
+    </turbo-stream>
+{% else %}
+    <turbo-stream action="replace" target="consensus-strip">
+        <template>
+            <div id="consensus-strip" class="pp-consensus pp-consensus--empty" hidden></div>
+        </template>
+    </turbo-stream>
+{% endif %}
+<turbo-stream action="replace" target="recap-panel">
+    <template>
+        {% include '@SymfinityPokerPlanner/room/_recap_panel.html.twig' with {recapRows: recapRows|default([]), compact: true} %}
+    </template>
+</turbo-stream>
+{% include '@SymfinityPokerPlanner/room/_story_audience.stream.html.twig' %}
+{% if refreshQueueDrawer|default(storyQueue.complete) %}
+<turbo-stream action="replace" target="story-queue-drawer">
+    <template>
+        {% include '@SymfinityPokerPlanner/room/_story_queue.html.twig' with {
+            roomId: roomId,
+            storyTitle: storyTitle,
+            storyQueue: storyQueue,
+            isModerator: isModerator|default(false),
+        } %}
+    </template>
+</turbo-stream>
+{% endif %}
+<turbo-stream action="replace" target="pp-brand-suffix">
+    <template>
+        <span class="pp-brand__suffix" id="pp-brand-suffix">
+            {{ room.settings.displayTitle() }}{% if not room.settings.saved %}*{% endif %}
+        </span>
+    </template>
+</turbo-stream>
+<turbo-stream action="replace" target="pp-room-meta">
+    <template>
+        <span
+            id="pp-room-meta"
+            hidden
+            data-show-confetti="{{ room.settings.showConfetti ? '1' : '0' }}"
+            data-celebrate-confetti="{{ room.settings.showConfetti and consensus is defined and consensus and consensus.hasZeroSpread() ? '1' : '0' }}"
+        ></span>
+    </template>
+</turbo-stream>

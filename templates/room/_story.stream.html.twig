@@ -1,5 +1,25 @@
-<turbo-stream action="replace" target="story-title">
+{% include '@SymfinityPokerPlanner/room/_story_audience.stream.html.twig' %}
+{% if isModerator|default(false) %}
+<turbo-stream action="replace" target="story-queue-moderator">
     <template>
-        <h2 id="story-title" class="pp-story">{{ storyTitle ?: 'Untitled story' }}</h2>
+        {% include '@SymfinityPokerPlanner/room/_story_queue_moderator.html.twig' with {
+            roomId: roomId,
+            storyTitle: storyTitle,
+            storyQueue: storyQueue,
+            isModerator: true,
+        } %}
     </template>
 </turbo-stream>
+{% endif %}
+{% if storyQueue.complete %}
+<turbo-stream action="replace" target="story-queue-drawer">
+    <template>
+        {% include '@SymfinityPokerPlanner/room/_story_queue.html.twig' with {
+            roomId: roomId,
+            storyTitle: storyTitle,
+            storyQueue: storyQueue,
+            isModerator: isModerator|default(false),
+        } %}
+    </template>
+</turbo-stream>
+{% endif %}

@@ -19,12 +19,16 @@ final class ParticipantSession
 
     public function getParticipantId(): ?string
     {
-        return $this->session()?->get(self::PARTICIPANT_KEY);
+        $value = $this->session()?->get(self::PARTICIPANT_KEY);
+
+        return is_string($value) ? $value : null;
     }
 
     public function getRoomId(): ?string
     {
-        return $this->session()?->get(self::ROOM_KEY);
+        $value = $this->session()?->get(self::ROOM_KEY);
+
+        return is_string($value) ? $value : null;
     }
 
     public function bind(string $roomId, string $participantId): void

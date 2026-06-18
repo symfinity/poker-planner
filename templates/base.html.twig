@@ -6,21 +6,16 @@
     <meta name="color-scheme" content="{{ colorScheme }}">
     <title>{% block title %}Poker Planner{% endblock %}</title>
     {% include '@UiKernel/_head.html.twig' %}
-    <link rel="stylesheet" href="{{ asset('styles/poker-planner.css', 'poker_planner') }}">
+    <link rel="stylesheet" href="{{ asset('poker-planner/styles/poker-planner.css') }}">
     {% block head %}
         {{ importmap('app') }}
     {% endblock %}
 </head>
-<body class="pp-body">
+<body class="pp-body" data-controller="symfinity--poker-planner--poker-planner">
 <div class="pp-shell">
-    {% block shell_bar %}
-    <header class="pp-shell__bar">
-        {% include '@SymfinityPokerPlanner/_scheme_switcher.html.twig' %}
-    </header>
-    {% endblock %}
+    {% block shell_bar %}{% endblock %}
     {% block body %}{% endblock %}
 </div>
-<script src="{{ asset('js/poker-planner.js', 'poker_planner') }}" defer></script>
 {% block javascripts %}{% endblock %}
 </body>
 </html>

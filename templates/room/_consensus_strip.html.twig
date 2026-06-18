@@ -1,0 +1,17 @@
+<div
+    id="consensus-strip"
+    class="pp-consensus"
+    data-celebrate-confetti="{{ celebrateConfetti|default(false) ? '1' : '0' }}"
+>
+    <p class="pp-consensus__label">Consensus</p>
+    <p class="pp-consensus__value">
+        {% if roundedMedianLabel is defined and roundedMedianLabel %}
+            Rounded {{ roundedMedianLabel }} · {{ consensus.statusMessage }}
+        {% else %}
+            {{ consensus.statusMessage }}
+        {% endif %}
+    </p>
+    {% if consensus.outlierParticipantIds is not empty %}
+        <p class="pp-consensus__hint">Outliers are more than one Fibonacci step from the median — discuss before locking.</p>
+    {% endif %}
+</div>

@@ -6,5 +6,6 @@ poker_planner:
     prefix: poker_planner
   room:
     max_ttl_seconds: 14400
+    saved_ttl_seconds: 31536000
     grace_seconds: 600
     heartbeat_seconds: 30

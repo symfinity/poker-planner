@@ -1,0 +1,9 @@
+<a href="{{ path('poker_planner_entry') }}" class="pp-brand" id="pp-brand">
+    <span class="pp-brand__icon" aria-hidden="true">{{ ux_blocks_icon('hugeicons:joker') }}</span>
+    <span class="pp-brand__title">Poker Planner</span>
+    {% if inRoom|default(false) %}
+        <span class="pp-brand__suffix" id="pp-brand-suffix">
+            {{ roomTitle|default('quick room') }}{% if not roomSaved|default(false) %}*{% endif %}
+        </span>
+    {% endif %}
+</a>

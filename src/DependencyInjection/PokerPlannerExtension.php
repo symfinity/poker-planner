@@ -6,6 +6,7 @@ namespace Symfinity\Bundle\PokerPlanner\DependencyInjection;
 
 use Symfinity\Bundle\PokerPlanner\Storage\RedisRoomStore;
 use Symfinity\Bundle\PokerPlanner\Storage\RoomStoreInterface;
+use Symfinity\Bundle\PokerPlanner\Support\Coerce;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -17,18 +18,13 @@ final class PokerPlannerExtension extends Extension implements PrependExtensionI
 {
     public function prepend(ContainerBuilder $container): void
     {
+        $packageDir = \dirname(__DIR__, 2);
+
         if ($container->hasExtension('framework')) {
             $container->prependExtensionConfig('framework', [
                 'asset_mapper' => [
-                    'excluded_patterns' => [
-                        'bundles/pokerplanner/**',
-                    ],
-                ],
-                'assets' => [
-                    'packages' => [
-                        'poker_planner' => [
-                            'base_path' => '/bundles/pokerplanner',
-                        ],
+                    'paths' => [
+                        $packageDir . '/assets' => 'poker-planner',
                     ],
                 ],
             ]);
@@ -36,7 +32,7 @@ final class PokerPlannerExtension extends Extension implements PrependExtensionI
 
         $container->prependExtensionConfig('twig', [
             'paths' => [
-                __DIR__ . '/../../templates' => 'SymfinityPokerPlanner',
+                $packageDir . '/templates' => 'SymfinityPokerPlanner',
             ],
         ]);
     }
@@ -44,15 +40,20 @@ final class PokerPlannerExtension extends Extension implements PrependExtensionI
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
+        /** @var array<string, mixed> $config */
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('poker_planner.path_prefix', $config['path_prefix'] ?? '');
-        $container->setParameter('poker_planner.mercure_topic_prefix', $config['mercure_topic_prefix']);
-        $container->setParameter('poker_planner.storage.redis_url', $config['storage']['redis_url']);
-        $container->setParameter('poker_planner.storage.prefix', $config['storage']['prefix']);
-        $container->setParameter('poker_planner.room.max_ttl_seconds', $config['room']['max_ttl_seconds']);
-        $container->setParameter('poker_planner.room.grace_seconds', $config['room']['grace_seconds']);
-        $container->setParameter('poker_planner.room.heartbeat_seconds', $config['room']['heartbeat_seconds']);
+        $storage = Coerce::arrayMap($config['storage'] ?? null);
+        $room = Coerce::arrayMap($config['room'] ?? null);
+
+        $container->setParameter('poker_planner.path_prefix', Coerce::string($config['path_prefix'] ?? null));
+        $container->setParameter('poker_planner.mercure_topic_prefix', Coerce::string($config['mercure_topic_prefix'] ?? null));
+        $container->setParameter('poker_planner.storage.redis_url', Coerce::string($storage['redis_url'] ?? null, '%env(REDIS_URL)%'));
+        $container->setParameter('poker_planner.storage.prefix', Coerce::string($storage['prefix'] ?? null, 'poker_planner'));
+        $container->setParameter('poker_planner.room.max_ttl_seconds', Coerce::int($room['max_ttl_seconds'] ?? null, 14_400));
+        $container->setParameter('poker_planner.room.saved_ttl_seconds', Coerce::int($room['saved_ttl_seconds'] ?? null, 31_536_000));
+        $container->setParameter('poker_planner.room.grace_seconds', Coerce::int($room['grace_seconds'] ?? null, 600));
+        $container->setParameter('poker_planner.room.heartbeat_seconds', Coerce::int($room['heartbeat_seconds'] ?? null, 30));
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
         $loader->load('services.yaml');

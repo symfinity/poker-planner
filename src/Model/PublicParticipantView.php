@@ -16,6 +16,7 @@ final class PublicParticipantView
         public readonly bool $hasVoted,
         public readonly ?string $voteLabel,
         public readonly ?string $voteAccent = null,
+        public readonly ?string $voteIcon = null,
     ) {
     }
 
@@ -23,8 +24,10 @@ final class PublicParticipantView
     {
         $voteLabel = null;
         $voteAccent = null;
+        $voteIcon = null;
         if ($phase === Phase::Revealed && $participant->voteValue instanceof CardValue) {
-            $voteLabel = $participant->voteValue->label();
+            $voteIcon = $participant->voteValue->icon();
+            $voteLabel = null === $voteIcon ? $participant->voteValue->label() : null;
             $voteAccent = $participant->voteValue->accent();
         }
 
@@ -35,6 +38,7 @@ final class PublicParticipantView
             hasVoted: $participant->hasVoted,
             voteLabel: $voteLabel,
             voteAccent: $voteAccent,
+            voteIcon: $voteIcon,
         );
     }
 }

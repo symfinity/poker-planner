@@ -30,6 +30,7 @@ final class Configuration implements ConfigurationInterface
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->integerNode('max_ttl_seconds')->defaultValue(14_400)->end()
+                        ->integerNode('saved_ttl_seconds')->defaultValue(31_536_000)->end()
                         ->integerNode('grace_seconds')->defaultValue(600)->end()
                         ->integerNode('heartbeat_seconds')->defaultValue(30)->end()
                     ->end()

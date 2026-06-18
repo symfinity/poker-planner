@@ -1,34 +1,32 @@
 {% extends '@SymfinityPokerPlanner/base.html.twig' %}
 
-{% block title %}Poker Planner — start or join{% endblock %}
+{% block title %}Poker Planner{% endblock %}
 
 {% block body %}
-<main class="pp-entry">
-    <h1>Poker Planner</h1>
-    <p class="pp-lead">Planning poker with hidden votes and simultaneous reveal.</p>
+<main class="pp-entry pp-entry--splash">
+    <div class="pp-corner pp-corner--br">
+        <button type="button" class="pp-corner-btn pp-corner-btn--icon" data-dialog-open="pp-about-dialog" aria-label="About Poker Planner">@</button>
+    </div>
 
-    {% for message in app.flashes('error') %}
-        <p class="pp-flash pp-flash--error">{{ message }}</p>
-    {% endfor %}
+    <div class="pp-entry__stack">
+        <div class="pp-entry__title-row">
+            <span class="pp-entry__icon" aria-hidden="true">{{ ux_blocks_icon('hugeicons:joker') }}</span>
+            <h1 class="pp-entry__brand">Poker Planner</h1>
+        </div>
+        <div class="pp-entry__actions pp-entry__actions--delayed">
+            <button type="button" class="pp-corner-btn pp-corner-btn--solid pp-entry__start" data-dialog-open="pp-start-dialog">Start</button>
+        </div>
+    </div>
 
-    <section class="pp-panel">
-        <h2>Create a room</h2>
-        <form method="post" action="{{ path('poker_planner_create') }}">
-            <label for="create-name">Your name</label>
-            <input id="create-name" name="display_name" required maxlength="64" autocomplete="nickname">
-            <button type="submit" class="pp-btn pp-btn--primary">Create room</button>
-        </form>
-    </section>
+    <p
+        id="pp-room-gone-banner"
+        class="pp-flash pp-flash--warning pp-entry__flash"
+        role="status"
+        hidden
+        data-message="This room is no longer available. Start a new session or ask for an updated link."
+    ></p>
 
-    <section class="pp-panel">
-        <h2>{% if roomId %}Join shared room{% else %}Join a room{% endif %}</h2>
-        <form method="post" action="{{ path('poker_planner_join') }}">
-            <label for="join-name">Your name</label>
-            <input id="join-name" name="display_name" required maxlength="64" autocomplete="nickname"{% if roomId %} autofocus{% endif %}>
-            <label for="join-room">Room id (from shared link)</label>
-            <input id="join-room" name="room_id" required value="{{ roomId|e('html_attr') }}" placeholder="550e8400-e29b-41d4-a716-446655440000"{% if roomId %} readonly{% endif %}>
-            <button type="submit" class="pp-btn">Join</button>
-        </form>
-    </section>
+    {% include '@SymfinityPokerPlanner/_start_dialog.html.twig' %}
+    {% include '@SymfinityPokerPlanner/_about_dialog.html.twig' %}
 </main>
 {% endblock %}

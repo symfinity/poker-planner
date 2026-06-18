@@ -1,0 +1,47 @@
+<div id="story-queue-drawer" class="pp-queue-drawer" data-queue-drawer>
+    <div class="pp-queue-drawer__shell">
+        <div id="story-queue-panel" class="pp-queue-drawer__panel">
+            <header class="pp-queue-drawer__header">
+                <h2 class="pp-queue-drawer__title">Story queue</h2>
+                {% include '@SymfinityPokerPlanner/room/_story_queue_meta.html.twig' %}
+            </header>
+
+            <div id="story-queue-list">
+                {% include '@SymfinityPokerPlanner/room/_story_queue_list.html.twig' with {
+                    storyQueue: storyQueue,
+                    roomId: roomId,
+                } %}
+            </div>
+
+            {% include '@SymfinityPokerPlanner/room/_story_queue_moderator.html.twig' with {
+                roomId: roomId,
+                storyTitle: storyTitle,
+                storyQueue: storyQueue,
+                isModerator: isModerator|default(false),
+            } %}
+
+            {% if storyQueue.complete %}
+                <p class="pp-queue-drawer__complete">All stories have been estimated. </p>
+                <form method="post" action="{{ path('poker_planner_session_new', {uuid: roomId}) }}" data-turbo="true">
+                    <button type="submit" class="pp-btn pp-btn--primary">Add to recap</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <button
+            type="button"
+            class="pp-queue-drawer__toggle"
+            data-action="symfinity--poker-planner--poker-planner#toggleQueue"
+            aria-controls="story-queue-panel"
+            aria-expanded="false"
+        >
+            <span class="pp-queue-drawer__toggle-icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 4.25h12M2 8h12M2 11.75h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span class="pp-queue-drawer__toggle-label">Queue</span>
+            {% include '@SymfinityPokerPlanner/room/_story_queue_badge.html.twig' with { storyQueue: storyQueue } %}
+        </button>
+    </div>
+</div>

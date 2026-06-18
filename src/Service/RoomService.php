@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Symfinity\Bundle\PokerPlanner\Service;
 
 use Symfinity\Bundle\PokerPlanner\Model\CardValue;
+use Symfinity\Bundle\PokerPlanner\Model\ConsensusSummary;
 use Symfinity\Bundle\PokerPlanner\Model\Participant;
 use Symfinity\Bundle\PokerPlanner\Model\Phase;
 use Symfinity\Bundle\PokerPlanner\Model\Room;
+use Symfinity\Bundle\PokerPlanner\Model\RoomSettings;
+use Symfinity\Bundle\PokerPlanner\Model\StoryQueue;
 use Symfinity\Bundle\PokerPlanner\Storage\RoomStoreInterface;
 use Symfony\Component\Uid\Uuid;
 
@@ -15,9 +18,11 @@ final class RoomService
 {
     public function __construct(
         private readonly RoomStoreInterface $store,
+        private readonly ConsensusCalculator $consensusCalculator,
+        private readonly DeckBuilder $deckBuilder,
         private readonly int $maxTtlSeconds,
+        private readonly int $savedTtlSeconds,
         private readonly int $graceSeconds,
-        private readonly int $heartbeatSeconds,
     ) {
     }
 
@@ -29,7 +34,7 @@ final class RoomService
 
         $room = new Room(
             id: $roomId,
-            storyTitle: '',
+            storyQueue: new StoryQueue(),
             phase: Phase::Voting,
             createdAt: $now,
             lastActivityAt: $now,
@@ -75,8 +80,12 @@ final class RoomService
         $room = $this->requireRoom($roomId);
         $participant = $this->requireParticipant($room, $participantId);
 
-        if ($room->phase !== Phase::Voting) {
+        if (!$this->isVotingOpen($room)) {
             throw new \DomainException('Voting is closed.');
+        }
+
+        if (!$this->isCardInDeck($room, $card)) {
+            throw new \InvalidArgumentException('Card is not in the active deck.');
         }
 
         $participant->hasVoted = true;
@@ -92,7 +101,7 @@ final class RoomService
         $room = $this->requireRoom($roomId);
         $participant = $this->requireParticipant($room, $participantId);
 
-        if ($room->phase !== Phase::Voting) {
+        if (!$this->isVotingOpen($room)) {
             throw new \DomainException('Voting is closed.');
         }
 
@@ -109,6 +118,10 @@ final class RoomService
         $room = $this->requireRoom($roomId);
         $this->requireModerator($room, $participantId);
 
+        if ($room->storyQueue->complete) {
+            throw new \DomainException('Queue is complete.');
+        }
+
         $room->phase = Phase::Revealed;
         $room->touch(time());
         $this->persist($room);
@@ -121,11 +134,11 @@ final class RoomService
         $room = $this->requireRoom($roomId);
         $this->requireModerator($room, $participantId);
 
-        foreach ($room->participants as $participant) {
-            $participant->hasVoted = false;
-            $participant->voteValue = null;
+        if ($room->storyQueue->complete) {
+            throw new \DomainException('Queue is complete.');
         }
 
+        $this->clearVotes($room);
         $room->phase = Phase::Voting;
         $room->touch(time());
         $this->persist($room);
@@ -138,11 +151,118 @@ final class RoomService
         $room = $this->requireRoom($roomId);
         $this->requireModerator($room, $participantId);
 
-        $room->storyTitle = trim($title);
+        $room->storyQueue->setCurrentTitle($title);
         $room->touch(time());
         $this->persist($room);
 
         return $room;
+    }
+
+    public function renameParticipant(string $roomId, string $participantId, string $displayName): Room
+    {
+        $room = $this->requireRoom($roomId);
+        $participant = $this->requireParticipant($room, $participantId);
+
+        $displayName = trim($displayName);
+        if ('' === $displayName) {
+            throw new \InvalidArgumentException('Display name is required.');
+        }
+
+        $participant->displayName = $displayName;
+        $room->touch(time());
+        $this->persist($room);
+
+        return $room;
+    }
+
+    public function addStory(string $roomId, string $participantId, string $title): Room
+    {
+        $room = $this->requireRoom($roomId);
+        $this->requireModerator($room, $participantId);
+
+        $room->storyQueue->addStory($title);
+        $room->touch(time());
+        $this->persist($room);
+
+        return $room;
+    }
+
+    public function removeStory(string $roomId, string $participantId, int $index): Room
+    {
+        $room = $this->requireRoom($roomId);
+        $this->requireModerator($room, $participantId);
+
+        $room->storyQueue->removeStory($index);
+        $room->touch(time());
+        $this->persist($room);
+
+        return $room;
+    }
+
+    public function nextStory(string $roomId, string $participantId, ?string $recordedEstimate = null): Room
+    {
+        $room = $this->requireRoom($roomId);
+        $this->requireModerator($room, $participantId);
+
+        if ($room->storyQueue->complete) {
+            throw new \DomainException('Queue is already complete.');
+        }
+
+        if ($room->phase !== Phase::Revealed) {
+            throw new \DomainException('Reveal the current round before advancing.');
+        }
+
+        if ($room->storyQueue->count() === 0) {
+            throw new \DomainException('Add at least one story before continuing.');
+        }
+
+        $estimate = $recordedEstimate ?? $this->defaultRecordedEstimate($room) ?? '?';
+        $room->storyQueue->recordCurrentEstimate($estimate);
+
+        if ($room->storyQueue->isAtEnd()) {
+            $room->storyQueue->markComplete();
+            $room->touch(time());
+            $this->persist($room);
+
+            return $room;
+        }
+
+        $room->storyQueue->advance();
+
+        $this->clearVotes($room);
+        $room->phase = Phase::Voting;
+        $room->touch(time());
+        $this->persist($room);
+
+        return $room;
+    }
+
+    public function startNewSession(string $roomId, string $participantId): Room
+    {
+        $room = $this->requireRoom($roomId);
+        $this->requireModerator($room, $participantId);
+
+        if (!$room->storyQueue->complete) {
+            throw new \DomainException('Finish the queue before starting a new session.');
+        }
+
+        $room->storyQueue->archiveAndStartNewSession();
+        $this->clearVotes($room);
+        $room->phase = Phase::Voting;
+        $room->touch(time());
+        $this->persist($room);
+
+        return $room;
+    }
+
+    public function consensus(Room $room): ConsensusSummary
+    {
+        return $this->consensusCalculator->calculate($room);
+    }
+
+    public function roundedMedianLabel(Room $room): ?string
+    {
+        return $this->consensusCalculator->roundedMedianLabel($room);
     }
 
     public function heartbeat(string $roomId, string $participantId): Room
@@ -160,6 +280,45 @@ final class RoomService
         return $room;
     }
 
+    public function updateRoomSettings(string $roomId, string $participantId, RoomSettings $settings): Room
+    {
+        $room = $this->requireRoom($roomId);
+        $this->requireModerator($room, $participantId);
+
+        $room->settings = $settings;
+        $this->sanitizeVotesForDeck($room);
+        $room->touch(time());
+        $this->persist($room);
+
+        return $room;
+    }
+
+    public function saveRoom(string $roomId, string $participantId, string $teamName): Room
+    {
+        $room = $this->requireRoom($roomId);
+        $this->requireModerator($room, $participantId);
+
+        $teamName = trim($teamName);
+        if ('' === $teamName) {
+            throw new \InvalidArgumentException('Team name is required.');
+        }
+
+        $room->settings->teamName = $teamName;
+        $room->settings->saved = true;
+        $room->touch(time());
+        $this->persist($room);
+
+        return $room;
+    }
+
+    public function deleteRoom(string $roomId, string $participantId): void
+    {
+        $room = $this->requireRoom($roomId);
+        $this->requireModerator($room, $participantId);
+
+        $this->store->delete($roomId);
+    }
+
     public function getRoom(string $roomId): ?Room
     {
         $room = $this->store->get($roomId);
@@ -174,9 +333,60 @@ final class RoomService
 
     public function remainingTtl(Room $room): int
     {
+        $limit = $room->settings->saved ? $this->savedTtlSeconds : $this->maxTtlSeconds;
         $elapsed = time() - $room->createdAt;
 
-        return max(1, $this->maxTtlSeconds - $elapsed);
+        return max(1, $limit - $elapsed);
+    }
+
+    private function isVotingOpen(Room $room): bool
+    {
+        if ($room->storyQueue->complete) {
+            return false;
+        }
+
+        return match ($room->phase) {
+            Phase::Voting => true,
+            Phase::Revealed => $room->settings->allowChangeAfterReveal,
+        };
+    }
+
+    private function isCardInDeck(Room $room, CardValue $card): bool
+    {
+        foreach ($this->deckBuilder->buildForRoom($room) as $deckCard) {
+            if ($deckCard === $card) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function sanitizeVotesForDeck(Room $room): void
+    {
+        foreach ($room->participants as $participant) {
+            if (!$participant->voteValue instanceof CardValue) {
+                continue;
+            }
+
+            if (!$this->isCardInDeck($room, $participant->voteValue)) {
+                $participant->hasVoted = false;
+                $participant->voteValue = null;
+            }
+        }
+    }
+
+    private function defaultRecordedEstimate(Room $room): ?string
+    {
+        return $this->consensusCalculator->roundedMedianLabel($room);
+    }
+
+    private function clearVotes(Room $room): void
+    {
+        foreach ($room->participants as $participant) {
+            $participant->hasVoted = false;
+            $participant->voteValue = null;
+        }
     }
 
     private function persist(Room $room): void
@@ -187,7 +397,8 @@ final class RoomService
     private function garbageCollect(Room $room): void
     {
         $now = time();
-        if ($now - $room->createdAt >= $this->maxTtlSeconds) {
+        $limit = $room->settings->saved ? $this->savedTtlSeconds : $this->maxTtlSeconds;
+        if ($now - $room->createdAt >= $limit) {
             $this->store->delete($room->id);
             throw new \DomainException('Room expired.');
         }

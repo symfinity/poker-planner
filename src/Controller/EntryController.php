@@ -66,6 +66,12 @@ final class EntryController extends AbstractController
         try {
             $join = $this->rooms->joinRoom($roomId, $name);
         } catch (\DomainException $exception) {
+            if (\in_array($exception->getMessage(), ['Room not found.', 'Room expired.', 'Room closed.'], true)) {
+                $this->addFlash('warning', 'This room is no longer available. Start a new session or ask for an updated link.');
+
+                return $this->redirectToRoute('poker_planner_entry');
+            }
+
             $this->addFlash('error', $exception->getMessage());
 
             return $this->redirectToRoute('poker_planner_entry', $this->entryQueryForRoom($roomId));

@@ -1,0 +1,41 @@
+{% if isModerator|default(false) and storyQueue.isEditable %}
+<div id="story-queue-moderator" class="pp-story-moderator">
+    <form
+        id="story-queue-form"
+        class="pp-story-moderator__form"
+        method="post"
+        action="{{ path('poker_planner_story', {uuid: roomId}) }}"
+        data-turbo="true"
+    >
+        <label class="pp-story-moderator__label" for="story-title-input">Story title</label>
+        <div class="pp-story-moderator__row">
+            <input
+                id="story-title-input"
+                class="pp-queue-field"
+                name="story_title"
+                value="{{ storyTitle }}"
+                maxlength="255"
+                placeholder="What are we estimating?"
+                autocomplete="off"
+            >
+            <div class="pp-story-moderator__actions">
+                <button
+                    type="submit"
+                    class="pp-queue-btn"
+                    formaction="{{ path('poker_planner_story', {uuid: roomId}) }}"
+                >Save</button>
+                <button
+                    type="submit"
+                    class="pp-queue-btn pp-queue-btn--primary"
+                    formaction="{{ path('poker_planner_queue_add', {uuid: roomId}) }}"
+                >Add</button>
+            </div>
+        </div>
+        <p class="pp-story-moderator__hint">Save updates the active story. Add queues another.</p>
+    </form>
+</div>
+{% elseif isModerator|default(false) %}
+<div id="story-queue-moderator" class="pp-story-moderator" hidden></div>
+{% else %}
+<div id="story-queue-moderator" hidden></div>
+{% endif %}

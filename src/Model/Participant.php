@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Symfinity\Bundle\PokerPlanner\Model;
 
+use Symfinity\Bundle\PokerPlanner\Support\Coerce;
+
 final class Participant
 {
     public function __construct(
         public readonly string $id,
-        public readonly string $displayName,
+        public string $displayName,
         public readonly bool $isModerator,
         public bool $hasVoted = false,
         public ?CardValue $voteValue = null,
@@ -24,12 +26,12 @@ final class Participant
         $vote = $data['voteValue'] ?? null;
 
         return new self(
-            id: (string) $data['id'],
-            displayName: (string) $data['displayName'],
-            isModerator: (bool) ($data['isModerator'] ?? false),
-            hasVoted: (bool) ($data['hasVoted'] ?? false),
+            id: Coerce::string($data['id'] ?? null),
+            displayName: Coerce::string($data['displayName'] ?? null),
+            isModerator: Coerce::bool($data['isModerator'] ?? false),
+            hasVoted: Coerce::bool($data['hasVoted'] ?? false),
             voteValue: is_string($vote) ? CardValue::from($vote) : null,
-            lastSeenAt: (int) ($data['lastSeenAt'] ?? 0),
+            lastSeenAt: Coerce::int($data['lastSeenAt'] ?? 0),
         );
     }
 

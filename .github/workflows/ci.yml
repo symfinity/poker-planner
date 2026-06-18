@@ -1,0 +1,61 @@
+name: CI
+
+# Matrix: maintained PHP x maintained Symfony (floor 7.4.*).
+# Regenerated 2026-06-18 — refresh: split-mirror-docs/scripts/fetch-ci-matrix.sh --gha-json --package-php='>=8.2'
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { php: '8.2', symfony: '7.4' }
+          - { php: '8.3', symfony: '7.4' }
+          - { php: '8.4', symfony: '7.4' }
+          - { php: '8.5', symfony: '7.4' }
+          - { php: '8.4', symfony: '8.0' }
+          - { php: '8.5', symfony: '8.0' }
+          - { php: '8.4', symfony: '8.1' }
+          - { php: '8.5', symfony: '8.1' }
+
+    name: PHPUnit + PHPStan (PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}.*)
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xml, ctype, iconv, json
+          coverage: none
+          tools: composer:v2
+
+      - name: Pin Symfony ${{ matrix.symfony }}
+        run: |
+          composer require --no-update \
+            symfony/config:^${{ matrix.symfony }} \
+            symfony/dependency-injection:^${{ matrix.symfony }} \
+            symfony/framework-bundle:^${{ matrix.symfony }} \
+            symfony/http-foundation:^${{ matrix.symfony }} \
+            symfony/http-kernel:^${{ matrix.symfony }} \
+            symfony/routing:^${{ matrix.symfony }} \
+            symfony/twig-bundle:^${{ matrix.symfony }} \
+            symfony/uid:^${{ matrix.symfony }} \
+            symfony/yaml:^${{ matrix.symfony }}
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit --colors=always
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=512M

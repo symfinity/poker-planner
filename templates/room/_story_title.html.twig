@@ -1,0 +1,8 @@
+<div id="story-title">
+    {% if storyQueue.complete %}
+        <p class="pp-story-progress">Queue complete</p>
+        <h2 class="pp-story">{{ storyTitle ?: 'All stories estimated' }}</h2>
+    {% else %}
+        <h2 class="pp-story">{{ storyTitle ?: 'Untitled story' }}</h2>
+    {% endif %}
+</div>

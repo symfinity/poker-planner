@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Symfinity\Bundle\PokerPlanner\Service;
 
-use Symfinity\Bundle\PokerPlanner\Model\CardValue;
+use Symfinity\Bundle\PokerPlanner\Model\ConsensusSummary;
 use Symfinity\Bundle\PokerPlanner\Model\Phase;
 use Symfinity\Bundle\PokerPlanner\Model\PublicParticipantView;
 use Symfinity\Bundle\PokerPlanner\Model\Room;
@@ -18,6 +18,8 @@ final class RoomTurboPublisher
     public function __construct(
         private readonly HubInterface $hub,
         private readonly Environment $twig,
+        private readonly DeckBuilder $deckBuilder,
+        private readonly ConsensusCalculator $consensusCalculator,
         private readonly string $topicPrefix,
         private readonly ?LoggerInterface $logger = null,
     ) {
@@ -28,9 +30,9 @@ final class RoomTurboPublisher
         $this->publish($room->id, $this->renderGrid($room, $revealed));
     }
 
-    public function publishSessionSync(Room $room, bool $revealed = false): void
+    public function publishSessionSync(Room $room, bool $revealed = false, ?ConsensusSummary $consensus = null, bool $refreshQueueDrawer = false): void
     {
-        $this->publish($room->id, $this->renderSessionSync($room, $revealed));
+        $this->publish($room->id, $this->renderSessionSync($room, $revealed, $consensus, $refreshQueueDrawer));
     }
 
     public function renderGrid(Room $room, bool $revealed = false): string
@@ -43,7 +45,7 @@ final class RoomTurboPublisher
         ]);
     }
 
-    public function renderSessionSync(Room $room, bool $revealed = false): string
+    public function renderSessionSync(Room $room, bool $revealed = false, ?ConsensusSummary $consensus = null, bool $refreshQueueDrawer = false): string
     {
         $phase = $this->resolvePhase($room, $revealed);
 
@@ -51,27 +53,51 @@ final class RoomTurboPublisher
             'participants' => $this->publicParticipants($room, $phase),
             'phase' => $phase,
             'roomId' => $room->id,
-            'deck' => CardValue::deck(),
+            'deck' => $this->deckBuilder->buildForRoom($room),
+            'room' => $room,
+            'consensus' => $consensus,
+            'storyQueue' => $room->storyQueue,
+            'storyTitle' => $room->getStoryTitle(),
+            'recapRows' => $room->storyQueue->recapRows(),
+            'roundedMedianLabel' => $consensus?->hasNumericConsensus()
+                ? $this->consensusCalculator->roundedMedianLabel($room)
+                : null,
+            'refreshQueueDrawer' => $refreshQueueDrawer,
+            'isModerator' => false,
         ]);
     }
 
-    public function renderPhaseChange(Room $room, bool $revealed = false, bool $includeModeratorActions = false): string
-    {
+    public function renderPhaseChange(
+        Room $room,
+        bool $revealed = false,
+        bool $includeModeratorActions = false,
+        ?ConsensusSummary $consensus = null,
+    ): string {
         $phase = $this->resolvePhase($room, $revealed);
 
         return $this->twig->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', [
             'participants' => $this->publicParticipants($room, $phase),
             'phase' => $phase,
             'roomId' => $room->id,
-            'deck' => CardValue::deck(),
+            'deck' => $this->deckBuilder->buildForRoom($room),
+            'room' => $room,
             'includeModeratorActions' => $includeModeratorActions,
+            'consensus' => $consensus,
+            'storyQueue' => $room->storyQueue,
+            'storyTitle' => $room->getStoryTitle(),
+            'recapRows' => $room->storyQueue->recapRows(),
+            'roundedMedianLabel' => $consensus?->hasNumericConsensus()
+                ? $this->consensusCalculator->roundedMedianLabel($room)
+                : null,
         ]);
     }
 
     public function renderStory(Room $room): string
     {
-        return $this->twig->render('@SymfinityPokerPlanner/room/_story.stream.html.twig', [
-            'storyTitle' => $room->storyTitle,
+        return $this->twig->render('@SymfinityPokerPlanner/room/_story_audience.stream.html.twig', [
+            'storyTitle' => $room->getStoryTitle(),
+            'storyQueue' => $room->storyQueue,
+            'roomId' => $room->id,
         ]);
     }
 
@@ -88,8 +114,6 @@ final class RoomTurboPublisher
     private function publish(string $roomId, string $html): void
     {
         try {
-            // Public updates: room UUID is the capability token for guest v0.
-            // Private + cookie JWT requires same-origin Mercure (not dogfood :9080 → :9090).
             $this->hub->publish(new Update(
                 topics: [$this->topic($roomId)],
                 data: $html,
