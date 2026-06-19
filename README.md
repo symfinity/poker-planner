@@ -58,7 +58,7 @@ See [Quick start](docs/quickstart.md) for the full walkthrough.
 - **[Flex recipe](docs/flex-recipe.md)** — symfony-docker turnkey, manifest reference, asset merge
 - **[Installation](docs/installation.md)** — Composer, Flex recipe overview, infrastructure
 - **[Quick start](docs/quickstart.md)** — first session in minutes
-- **[Configuration](docs/configuration.md)** — `poker_planner.yaml` reference
+- **[Configuration](docs/configuration.md)** — `symfinity_poker_planner.yaml` reference
 - **[Realtime sync](docs/realtime.md)** — Mercure topics, Turbo streams, vote privacy (schematic diagrams)
 - **[Upgrade](docs/upgrade.md)** — release `0.1.0` notes
 

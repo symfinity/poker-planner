@@ -13,7 +13,7 @@
                 "fetch": "eager"
             }
         },
-        "@symfinity/ux-blocks-core": {
+        "@symfinity/ux-blocks-interactive": {
             "scheme-switch": {
                 "enabled": true,
                 "fetch": "eager"

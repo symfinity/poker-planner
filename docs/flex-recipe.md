@@ -83,7 +83,7 @@ symfony-docker ships Mercure as a **Caddy module** inside the `php` service. The
 
 | Package path | Project path |
 |--------------|--------------|
-| `config/packages/poker_planner.yaml` | `config/packages/poker_planner.yaml` |
+| `config/packages/symfinity_poker_planner.yaml` | `config/packages/symfinity_poker_planner.yaml` |
 | `config/packages/mercure.yaml` | `config/packages/mercure.yaml` |
 | `config/routes/poker_planner.yaml` | `config/routes/poker_planner.yaml` |
 | `install/assets/app.poker_planner.js` | `assets/app.poker_planner.js` |
@@ -178,7 +178,7 @@ Copied by the recipe. Required Stimulus controllers:
                 "fetch": "eager"
             }
         },
-        "@symfinity/ux-blocks-core": {
+        "@symfinity/ux-blocks-interactive": {
             "scheme-switch": {
                 "enabled": true,
                 "fetch": "eager"
@@ -250,7 +250,7 @@ See [Installation](installation.md) for non-Docker `.env` examples.
 
 1. `composer require symfinity/poker-planner predis/predis symfony/ux-icons`
 2. Register `Symfinity\Bundle\PokerPlanner\PokerPlannerBundle` in `config/bundles.php`
-3. Copy package `config/packages/poker_planner.yaml`, `config/packages/mercure.yaml`
+3. Copy package `config/packages/symfinity_poker_planner.yaml`, `config/packages/mercure.yaml`
 4. Copy `config/routes/poker_planner.yaml` and `config/routes/poker_planner_host.yaml`
 5. Copy `install/assets/*` → `assets/` and wire `app.poker_planner.js` in `app.js`
 6. `php bin/console importmap:install` and `php bin/console ux:icons:import hugeicons:joker`
@@ -274,4 +274,4 @@ See [Installation](installation.md) for non-Docker `.env` examples.
 - [Installation](installation.md) — overview and env reference
 - [Quick start](quickstart.md) — first session
 - [Realtime sync](realtime.md) — Mercure + Turbo architecture
-- [Configuration](configuration.md) — `poker_planner.yaml`
+- [Configuration](configuration.md) — `symfinity_poker_planner.yaml`

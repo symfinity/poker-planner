@@ -69,6 +69,6 @@ final class PokerPlannerExtension extends Extension implements PrependExtensionI
 
     public function getAlias(): string
     {
-        return 'poker_planner';
+        return 'symfinity_poker_planner';
     }
 }

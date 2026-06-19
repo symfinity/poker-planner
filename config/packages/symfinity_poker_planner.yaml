@@ -1,4 +1,4 @@
-poker_planner:
+symfinity_poker_planner:
   path_prefix: ''
   mercure_topic_prefix: ''
   storage:

@@ -1,9 +1,9 @@
 # Configuration
 
-All options live under `config/packages/poker_planner.yaml`:
+All options live under `config/packages/symfinity_poker_planner.yaml`:
 
 ```yaml
-poker_planner:
+symfinity_poker_planner:
   path_prefix: ''
   mercure_topic_prefix: ''
   storage:
@@ -26,7 +26,7 @@ Prepended to every bundle route. Empty string keeps the default layout:
 Example for `/tools/poker`:
 
 ```yaml
-poker_planner:
+symfinity_poker_planner:
   path_prefix: '/tools/poker'
 ```
 
@@ -39,7 +39,7 @@ Prepended to Mercure topics for room broadcasts. Default is empty; topics look l
 Set a prefix when multiple apps share one Mercure hub:
 
 ```yaml
-poker_planner:
+symfinity_poker_planner:
   mercure_topic_prefix: '/my-app'
 ```
 

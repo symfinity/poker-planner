@@ -11,7 +11,7 @@ final class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('poker_planner');
+        $treeBuilder = new TreeBuilder('symfinity_poker_planner');
 
         $root = $treeBuilder->getRootNode();
 

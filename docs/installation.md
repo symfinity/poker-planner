@@ -77,7 +77,7 @@ See [Flex recipe](flex-recipe.md) for the full manifest reference, Compose YAML 
 
 | Artifact | Source |
 |----------|--------|
-| `config/packages/poker_planner.yaml` | Package default |
+| `config/packages/symfinity_poker_planner.yaml` | Package default |
 | `config/packages/mercure.yaml` | Package default |
 | `config/routes/poker_planner.yaml` | Host + bundle routes |
 | `assets/app.poker_planner.js` | Package `install/assets/` |
@@ -95,7 +95,7 @@ When Flex is unavailable:
 
 1. `composer require symfinity/poker-planner predis/predis symfony/ux-icons`
 2. Register `Symfinity\Bundle\PokerPlanner\PokerPlannerBundle` in `config/bundles.php`
-3. Copy `config/packages/poker_planner.yaml` and `config/packages/mercure.yaml` from the package
+3. Copy `config/packages/symfinity_poker_planner.yaml` and `config/packages/mercure.yaml` from the package
 4. Copy `config/routes/poker_planner.yaml` and `config/routes/poker_planner_host.yaml`
 5. Copy `install/assets/*` into `assets/` and import `app.poker_planner.js` from `assets/app.js`
 6. Run `php bin/console importmap:install` and `php bin/console ux:icons:import hugeicons:joker`
@@ -106,5 +106,5 @@ When Flex is unavailable:
 
 - [Flex recipe](flex-recipe.md) — symfony-docker turnkey path and manifest reference
 - [Quick start](quickstart.md) — first session walkthrough
-- [Configuration](configuration.md) — `poker_planner.yaml` reference
+- [Configuration](configuration.md) — `symfinity_poker_planner.yaml` reference
 - [Realtime sync](realtime.md) — Mercure topics and Turbo streams
