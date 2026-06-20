@@ -1,6 +1,6 @@
 {
     "name": "symfinity/poker-planner",
-    "description": "Realtime planning-poker rooms with Mercure sync and hidden votes until reveal",
+    "description": "Self-hosted planning poker for Symfony - hidden votes, Mercure realtime, story queue",
     "type": "symfony-bundle",
     "license": "MIT",
     "homepage": "https://github.com/symfinity/poker-planner",
