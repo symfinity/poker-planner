@@ -1,5 +1,22 @@
 # Upgrade
 
+## 0.1.1
+
+Patch release — reveal quorum, moderator button states, session recap tab, and story-queue finish behaviour.
+
+```bash
+composer update symfinity/poker-planner
+```
+
+### Highlights
+
+- **Reveal** requires at least half the table to vote (UI + server guard)
+- Moderator footer buttons disable when the action is not allowed
+- **Finish queue** archives estimates and resets the queue for new stories
+- Session recap lives under Settings → **Session**
+
+No config or Flex recipe changes. Redis room documents from 0.1.0 remain compatible.
+
 ## 0.1.0
 
 First public release. Install with:
