@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 final class PokerPlannerBundle extends Bundle
 {
     /** Org policy: config root {@code symfinity_poker_planner} (rule 22). */
-    public function getContainerExtension(): ?ExtensionInterface
+    public function getContainerExtension(): ExtensionInterface
     {
         return new PokerPlannerExtension();
     }

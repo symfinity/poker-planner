@@ -65,7 +65,7 @@ final class RoomController extends AbstractController
         try {
             $card = CardValue::from($cardRaw);
             $roomBefore = $this->rooms->getRoom($uuid);
-            $wasVoted = $roomBefore?->findParticipant($participantId)?->hasVoted ?? false;
+            $wasVoted = $roomBefore?->findParticipant($participantId)->hasVoted ?? false;
             $room = $this->rooms->vote($uuid, $participantId, $card);
         } catch (\DomainException|\ValueError|\InvalidArgumentException $exception) {
             if ($response = $this->redirectIfRoomGone($exception)) {
