@@ -51,10 +51,15 @@ final class StoryQueue
             $currentIndex = count($items) - 1;
         }
 
+        $complete = Coerce::bool($data['complete'] ?? false);
+        if ($complete && [] === $items) {
+            $complete = false;
+        }
+
         return new self(
             items: $items,
             currentIndex: max(0, $currentIndex),
-            complete: Coerce::bool($data['complete'] ?? false),
+            complete: $complete,
             archivedRecapRows: self::normalizeRecapRows($data['archivedRecapRows'] ?? []),
         );
     }
@@ -187,27 +192,14 @@ final class StoryQueue
 
     public function markComplete(): void
     {
-        $this->complete = true;
+        $this->archiveRecordedItems();
+        $this->items = [];
+        $this->currentIndex = 0;
+        $this->complete = false;
     }
 
     public function archiveAndStartNewSession(): void
     {
-        if (!$this->complete) {
-            throw new \DomainException('Finish the queue before starting a new session.');
-        }
-
-        foreach ($this->items as $item) {
-            if (null === $item->recordedEstimate || '' === $item->recordedEstimate) {
-                continue;
-            }
-
-            $this->archivedRecapRows[] = [
-                'title' => $item->title,
-                'estimate' => $item->recordedEstimate,
-                'spreadNote' => null,
-            ];
-        }
-
         $this->items = [];
         $this->currentIndex = 0;
         $this->complete = false;
@@ -268,6 +260,21 @@ final class StoryQueue
         }
 
         return $rows;
+    }
+
+    private function archiveRecordedItems(): void
+    {
+        foreach ($this->items as $item) {
+            if (null === $item->recordedEstimate || '' === $item->recordedEstimate) {
+                continue;
+            }
+
+            $this->archivedRecapRows[] = [
+                'title' => $item->title,
+                'estimate' => $item->recordedEstimate,
+                'spreadNote' => null,
+            ];
+        }
     }
 
     /**

@@ -50,8 +50,10 @@ final class StoryQueueTest extends TestCase
         $queue->recordCurrentEstimate('8');
         $queue->markComplete();
 
-        self::assertTrue($queue->complete);
-        self::assertSame('Queue complete', $queue->positionLabel());
+        self::assertFalse($queue->complete);
+        self::assertSame(0, $queue->count());
+        self::assertSame('', $queue->positionLabel());
+        self::assertCount(1, $queue->recapRows());
     }
 
     public function testArchiveAndStartNewSessionPreservesRecap(): void
@@ -76,15 +78,6 @@ final class StoryQueueTest extends TestCase
         $queue->recordCurrentEstimate('8');
 
         self::assertCount(3, $queue->recapRows());
-    }
-
-    public function testArchiveRequiresCompletedQueue(): void
-    {
-        $queue = new StoryQueue();
-        $queue->addStory('Open story');
-
-        $this->expectException(\DomainException::class);
-        $queue->archiveAndStartNewSession();
     }
 
     public function testRemoveFutureStory(): void

@@ -1,10 +1,42 @@
+{% if refreshSlotGrid ?? true %}
 <turbo-stream action="replace" target="slot-grid">
     <template>
         {% include '@SymfinityPokerPlanner/room/_slot_grid.html.twig' %}
     </template>
 </turbo-stream>
+{% endif %}
 <turbo-stream action="replace" target="vote-deck">
     <template>
         {% include '@SymfinityPokerPlanner/room/_vote_deck.html.twig' %}
     </template>
 </turbo-stream>
+{% if refreshModeratorActions|default(false) %}
+    {% include '@SymfinityPokerPlanner/room/_moderator_actions.stream.html.twig' with {
+        roomId: roomId,
+        phase: phase,
+        storyQueue: storyQueue,
+        canRevealQuorum: canRevealQuorum|default(false),
+        hasAnyVotes: hasAnyVotes|default(false),
+    } %}
+{% endif %}
+{% if consensus is defined and consensus %}
+    <turbo-stream action="replace" target="consensus-strip">
+        <template>
+            {% include '@SymfinityPokerPlanner/room/_consensus_strip.html.twig' with {
+                consensus: consensus,
+                roundedMedianLabel: roundedMedianLabel|default(null),
+                celebrateConfetti: room.settings.showConfetti and consensus.hasZeroSpread(),
+            } %}
+        </template>
+    </turbo-stream>
+    <turbo-stream action="replace" target="pp-room-meta">
+        <template>
+            <span
+                id="pp-room-meta"
+                hidden
+                data-show-confetti="{{ room.settings.showConfetti ? '1' : '0' }}"
+                data-celebrate-confetti="{{ room.settings.showConfetti and consensus.hasZeroSpread() ? '1' : '0' }}"
+            ></span>
+        </template>
+    </turbo-stream>
+{% endif %}

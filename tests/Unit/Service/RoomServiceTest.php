@@ -75,6 +75,31 @@ final class RoomServiceTest extends TestCase
         $this->service->reveal($room->id, $join['participantId']);
     }
 
+    public function testRevealRequiresHalfTheTable(): void
+    {
+        $room = $this->service->createRoom('Mod');
+        $moderator = $room->moderator();
+        self::assertNotNull($moderator);
+
+        $dev1 = $this->service->joinRoom($room->id, 'Dev1')['participantId'];
+        $this->service->joinRoom($room->id, 'Dev2');
+        $this->service->vote($room->id, $dev1, CardValue::Five);
+
+        $this->expectException(\DomainException::class);
+        $this->service->reveal($room->id, $moderator->id);
+    }
+
+    public function testRestartRequiresAtLeastOneVote(): void
+    {
+        $room = $this->service->createRoom('Mod');
+        $moderator = $room->moderator();
+        self::assertNotNull($moderator);
+        $this->service->joinRoom($room->id, 'Dev');
+
+        $this->expectException(\DomainException::class);
+        $this->service->restart($room->id, $moderator->id);
+    }
+
     public function testStoryQueueNextStoryRecordsMedian(): void
     {
         $room = $this->service->createRoom('Mod');
@@ -110,10 +135,11 @@ final class RoomServiceTest extends TestCase
         $this->service->reveal($room->id, $moderator->id);
 
         $finished = $this->service->nextStory($room->id, $moderator->id);
-        self::assertTrue($finished->storyQueue->complete);
+        self::assertFalse($finished->storyQueue->complete);
         self::assertSame(Phase::Revealed, $finished->phase);
-        self::assertSame('5', $finished->storyQueue->items[0]->recordedEstimate);
+        self::assertSame(0, $finished->storyQueue->count());
         self::assertCount(1, $finished->storyQueue->recapRows());
+        self::assertSame('5', $finished->storyQueue->recapRows()[0]['estimate']);
     }
 
     public function testStartNewSessionAfterQueueComplete(): void
@@ -129,7 +155,8 @@ final class RoomServiceTest extends TestCase
         $this->service->reveal($room->id, $moderator->id);
         $finished = $this->service->nextStory($room->id, $moderator->id);
 
-        self::assertTrue($finished->storyQueue->complete);
+        self::assertFalse($finished->storyQueue->complete);
+        self::assertSame(0, $finished->storyQueue->count());
 
         $restarted = $this->service->startNewSession($room->id, $moderator->id);
         self::assertFalse($restarted->storyQueue->complete);
@@ -137,6 +164,40 @@ final class RoomServiceTest extends TestCase
         self::assertSame(0, $restarted->storyQueue->count());
         self::assertCount(1, $restarted->storyQueue->recapRows());
         self::assertFalse($restarted->findParticipant($join['participantId'])?->hasVoted);
+    }
+
+    public function testVoteAfterRevealWhenAllowChangeEnabled(): void
+    {
+        $room = $this->service->createRoom('Mod');
+        $moderator = $room->moderator();
+        self::assertNotNull($moderator);
+        $join = $this->service->joinRoom($room->id, 'Dev');
+        $devId = $join['participantId'];
+
+        $settings = $room->settings;
+        $settings->allowChangeAfterReveal = true;
+        $this->service->updateRoomSettings($room->id, $moderator->id, $settings);
+
+        $this->service->vote($room->id, $devId, CardValue::Eight);
+        $this->service->reveal($room->id, $moderator->id);
+
+        $changed = $this->service->vote($room->id, $devId, CardValue::Thirteen);
+        self::assertSame(CardValue::Thirteen, $changed->findParticipant($devId)?->voteValue);
+    }
+
+    public function testVoteAfterRevealRejectedWhenAllowChangeDisabled(): void
+    {
+        $room = $this->service->createRoom('Mod');
+        $moderator = $room->moderator();
+        self::assertNotNull($moderator);
+        $join = $this->service->joinRoom($room->id, 'Dev');
+        $devId = $join['participantId'];
+
+        $this->service->vote($room->id, $devId, CardValue::Eight);
+        $this->service->reveal($room->id, $moderator->id);
+
+        $this->expectException(\DomainException::class);
+        $this->service->vote($room->id, $devId, CardValue::Thirteen);
     }
 
     public function testLegacyStoryTitleMigratesOnLoad(): void

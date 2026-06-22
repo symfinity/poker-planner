@@ -2,9 +2,9 @@
     {% for participant in participants %}
         {% set isOutlier = consensus is defined and consensus and participant.id in consensus.outlierParticipantIds %}
         <article class="pp-slot{% if participant.hasVoted %} pp-slot--voted{% endif %}{% if phase.value == 'revealed' %} pp-slot--revealed{% endif %}{% if isOutlier %} pp-slot--outlier{% endif %}" data-participant-id="{{ participant.id }}">
-            <header class="pp-slot__name">{{ participant.displayName }}{% if participant.isModerator %} · mod{% endif %}</header>
+            <header class="pp-slot__name">{{ participant.displayName }}{% if participant.isModerator %}*{% endif %}</header>
             <div class="pp-slot__card">
-                <div class="pp-slot__card-inner{% if phase.value == 'revealed' %}{% if participant.voteLabel %} pp-slot__card-inner--animate{% else %} pp-slot__card-inner--flipped{% endif %}{% endif %}">
+                <div class="pp-slot__card-inner{% if phase.value == 'revealed' %} pp-slot__card-inner--{% if animateReveal|default(false) and participant.voteLabel %}animate{% else %}flipped{% endif %}{% endif %}">
                     <div class="pp-slot__card-face pp-slot__card-face--back">
                         <div class="pp-slot__card-shell pp-slot__card-shell--back">
                             {% if not participant.hasVoted %}

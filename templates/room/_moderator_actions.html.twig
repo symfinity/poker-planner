@@ -1,21 +1,20 @@
-<footer id="moderator-actions" class="pp-room__actions{% if storyQueue.complete %} pp-room__actions--complete{% endif %}">
-    {% if storyQueue.complete %}
-        <p class="pp-room__actions-note">Queue complete — open Settings for the recap.</p>
-    {% else %}
+<footer id="moderator-actions" class="pp-room__actions">
+    {% set canAdvanceStory = phase.value == 'revealed' and storyQueue.count > 0 %}
+        {% set canReveal = phase.value != 'revealed' and canRevealQuorum|default(false) %}
+        {% set canRestart = hasAnyVotes|default(false) %}
         <form method="post" action="{{ path('poker_planner_restart', {uuid: roomId}) }}" data-turbo="true">
-            <button type="submit" class="pp-btn pp-btn--outline">Restart</button>
+            <button type="submit" class="pp-btn pp-btn--outline"{% if not canRestart %} disabled aria-disabled="true"{% endif %}>Restart</button>
         </form>
         <form method="post" action="{{ path('poker_planner_reveal', {uuid: roomId}) }}" data-turbo="true">
-            <button type="submit" class="pp-btn pp-btn--reveal"{% if phase.value == 'revealed' %} disabled aria-disabled="true"{% endif %}>Reveal</button>
+            <button type="submit" class="pp-btn pp-btn--reveal"{% if not canReveal %} disabled aria-disabled="true"{% endif %}>Reveal</button>
         </form>
         <form method="post" action="{{ path('poker_planner_next_story', {uuid: roomId}) }}" data-turbo="true">
             <button
                 type="submit"
                 class="pp-btn pp-btn--primary"
-                {% if phase.value != 'revealed' or storyQueue.count == 0 %}disabled aria-disabled="true"{% endif %}
+                {% if not canAdvanceStory %}disabled aria-disabled="true"{% endif %}
             >
                 {% if storyQueue.isAtEnd %}Finish queue{% else %}Next story{% endif %}
             </button>
         </form>
-    {% endif %}
 </footer>

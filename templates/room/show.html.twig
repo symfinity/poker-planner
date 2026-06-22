@@ -28,7 +28,7 @@
         {% include '@SymfinityPokerPlanner/_brand.html.twig' with {
             inRoom: true,
             roomTitle: room.settings.displayTitle(),
-            roomSaved: room.settings.saved,
+            showEphemeralMark: self.isModerator and not room.settings.saved,
         } %}
     </div>
 
@@ -83,6 +83,8 @@
                 roomId: room.id,
                 phase: phase,
                 storyQueue: storyQueue,
+                canRevealQuorum: canRevealQuorum,
+                hasAnyVotes: hasAnyVotes,
             } %}
         {% endif %}
     </div>

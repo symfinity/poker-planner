@@ -122,6 +122,14 @@ final class RoomService
             throw new \DomainException('Queue is complete.');
         }
 
+        if ($room->phase === Phase::Revealed) {
+            throw new \DomainException('Cards are already revealed.');
+        }
+
+        if (!$room->hasRevealQuorum()) {
+            throw new \DomainException('At least half the table must vote before revealing.');
+        }
+
         $room->phase = Phase::Revealed;
         $room->touch(time());
         $this->persist($room);
@@ -136,6 +144,10 @@ final class RoomService
 
         if ($room->storyQueue->complete) {
             throw new \DomainException('Queue is complete.');
+        }
+
+        if (!$room->hasAnyVotes()) {
+            throw new \DomainException('No votes to restart.');
         }
 
         $this->clearVotes($room);
@@ -242,7 +254,7 @@ final class RoomService
         $room = $this->requireRoom($roomId);
         $this->requireModerator($room, $participantId);
 
-        if (!$room->storyQueue->complete) {
+        if ($room->storyQueue->count() > 0) {
             throw new \DomainException('Finish the queue before starting a new session.');
         }
 

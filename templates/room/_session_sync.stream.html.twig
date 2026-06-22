@@ -31,23 +31,9 @@
     </template>
 </turbo-stream>
 {% include '@SymfinityPokerPlanner/room/_story_audience.stream.html.twig' %}
-{% if refreshQueueDrawer|default(storyQueue.complete) %}
-<turbo-stream action="replace" target="story-queue-drawer">
+<turbo-stream action="replace" target="pp-brand-room-title">
     <template>
-        {% include '@SymfinityPokerPlanner/room/_story_queue.html.twig' with {
-            roomId: roomId,
-            storyTitle: storyTitle,
-            storyQueue: storyQueue,
-            isModerator: isModerator|default(false),
-        } %}
-    </template>
-</turbo-stream>
-{% endif %}
-<turbo-stream action="replace" target="pp-brand-suffix">
-    <template>
-        <span class="pp-brand__suffix" id="pp-brand-suffix">
-            {{ room.settings.displayTitle() }}{% if not room.settings.saved %}*{% endif %}
-        </span>
+        <span id="pp-brand-room-title">{{ room.settings.displayTitle() }}</span>
     </template>
 </turbo-stream>
 <turbo-stream action="replace" target="pp-room-meta">

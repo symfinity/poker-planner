@@ -284,7 +284,17 @@ export default class extends Controller {
 
         this.clearPickedCards();
         this.setPicked(button, true);
-        this.animateSlotVote(true);
+
+        const room = document.getElementById('poker-room');
+        const selfId = room instanceof HTMLElement ? room.dataset.selfParticipantId : '';
+        const slot =
+            selfId !== ''
+                ? document.querySelector('.pp-slot[data-participant-id="' + selfId + '"]')
+                : null;
+        const alreadyVoted = slot instanceof HTMLElement && slot.classList.contains('pp-slot--voted');
+        if (!alreadyVoted) {
+            this.animateSlotVote(true);
+        }
     }
 
     onTurboSubmitEnd(event) {

@@ -30,9 +30,14 @@ final class RoomTurboPublisher
         $this->publish($room->id, $this->renderGrid($room, $revealed));
     }
 
-    public function publishSessionSync(Room $room, bool $revealed = false, ?ConsensusSummary $consensus = null, bool $refreshQueueDrawer = false): void
-    {
-        $this->publish($room->id, $this->renderSessionSync($room, $revealed, $consensus, $refreshQueueDrawer));
+    public function publishSessionSync(
+        Room $room,
+        bool $revealed = false,
+        ?ConsensusSummary $consensus = null,
+        bool $refreshQueueDrawer = false,
+        bool $animateReveal = false,
+    ): void {
+        $this->publish($room->id, $this->renderSessionSync($room, $revealed, $consensus, $refreshQueueDrawer, $animateReveal));
     }
 
     public function renderGrid(Room $room, bool $revealed = false): string
@@ -42,11 +47,20 @@ final class RoomTurboPublisher
         return $this->twig->render('@SymfinityPokerPlanner/room/_slot_grid.stream.html.twig', [
             'participants' => $this->publicParticipants($room, $phase),
             'phase' => $phase,
+            'roomId' => $room->id,
+            'storyQueue' => $room->storyQueue,
+            'canRevealQuorum' => $room->hasRevealQuorum(),
+            'refreshModeratorActions' => Phase::Voting === $room->phase,
         ]);
     }
 
-    public function renderSessionSync(Room $room, bool $revealed = false, ?ConsensusSummary $consensus = null, bool $refreshQueueDrawer = false): string
-    {
+    public function renderSessionSync(
+        Room $room,
+        bool $revealed = false,
+        ?ConsensusSummary $consensus = null,
+        bool $refreshQueueDrawer = false,
+        bool $animateReveal = false,
+    ): string {
         $phase = $this->resolvePhase($room, $revealed);
 
         return $this->twig->render('@SymfinityPokerPlanner/room/_session_sync.stream.html.twig', [
@@ -64,6 +78,7 @@ final class RoomTurboPublisher
                 : null,
             'refreshQueueDrawer' => $refreshQueueDrawer,
             'isModerator' => false,
+            'animateReveal' => $animateReveal,
         ]);
     }
 

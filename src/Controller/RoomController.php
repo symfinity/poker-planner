@@ -64,6 +64,8 @@ final class RoomController extends AbstractController
 
         try {
             $card = CardValue::from($cardRaw);
+            $roomBefore = $this->rooms->getRoom($uuid);
+            $wasVoted = $roomBefore?->findParticipant($participantId)?->hasVoted ?? false;
             $room = $this->rooms->vote($uuid, $participantId, $card);
         } catch (\DomainException|\ValueError|\InvalidArgumentException $exception) {
             if ($response = $this->redirectIfRoomGone($exception)) {
@@ -79,21 +81,39 @@ final class RoomController extends AbstractController
             return $this->redirectToRoute('poker_planner_room', ['uuid' => $uuid]);
         }
 
-        $this->publisher->publishGrid($room);
+        $refreshSlotGrid = !$wasVoted
+            || (Phase::Revealed === $room->phase && $room->settings->allowChangeAfterReveal);
+
+        $consensus = Phase::Revealed === $room->phase ? $this->rooms->consensus($room) : null;
+        $roundedMedianLabel = null !== $consensus && $consensus->hasNumericConsensus()
+            ? $this->rooms->roundedMedianLabel($room)
+            : null;
+
+        if ($refreshSlotGrid) {
+            if (null !== $consensus) {
+                $this->publisher->publishSessionSync($room, true, $consensus);
+            } else {
+                $this->publisher->publishGrid($room);
+            }
+        }
 
         $self = $room->findParticipant($participantId);
         $selectedVote = $self?->voteValue?->value;
 
         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
 
-        return $this->render('@SymfinityPokerPlanner/room/_vote_update.stream.html.twig', [
+        return $this->render('@SymfinityPokerPlanner/room/_vote_update.stream.html.twig', array_merge([
             'participants' => $this->publicParticipants($room),
             'phase' => $room->phase,
             'roomId' => $room->id,
             'deck' => $this->deckBuilder->buildForRoom($room),
             'room' => $room,
             'selectedVote' => $selectedVote,
-        ]);
+            'consensus' => $consensus,
+            'roundedMedianLabel' => $roundedMedianLabel,
+            'refreshSlotGrid' => $refreshSlotGrid,
+            'refreshModeratorActions' => Phase::Voting === $room->phase,
+        ], $this->moderatorActionContext($room)));
     }
 
     #[Route('/vote/clear', name: 'vote_clear', methods: ['POST'])]
@@ -117,18 +137,31 @@ final class RoomController extends AbstractController
             return $this->redirectToRoute('poker_planner_room', ['uuid' => $uuid]);
         }
 
-        $this->publisher->publishGrid($room);
+        $consensus = Phase::Revealed === $room->phase ? $this->rooms->consensus($room) : null;
+        $roundedMedianLabel = null !== $consensus && $consensus->hasNumericConsensus()
+            ? $this->rooms->roundedMedianLabel($room)
+            : null;
+
+        if (null !== $consensus) {
+            $this->publisher->publishSessionSync($room, true, $consensus);
+        } else {
+            $this->publisher->publishGrid($room);
+        }
 
         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
 
-        return $this->render('@SymfinityPokerPlanner/room/_vote_update.stream.html.twig', [
+        return $this->render('@SymfinityPokerPlanner/room/_vote_update.stream.html.twig', array_merge([
             'participants' => $this->publicParticipants($room),
             'phase' => $room->phase,
             'roomId' => $room->id,
             'deck' => $this->deckBuilder->buildForRoom($room),
             'room' => $room,
             'selectedVote' => null,
-        ]);
+            'consensus' => $consensus,
+            'roundedMedianLabel' => $roundedMedianLabel,
+            'refreshSlotGrid' => true,
+            'refreshModeratorActions' => Phase::Voting === $room->phase,
+        ], $this->moderatorActionContext($room)));
     }
 
     #[Route('/reveal', name: 'reveal', methods: ['POST'])]
@@ -149,11 +182,11 @@ final class RoomController extends AbstractController
         }
 
         $consensus = $this->rooms->consensus($room);
-        $this->publisher->publishSessionSync($room, true, $consensus);
+        $this->publisher->publishSessionSync($room, true, $consensus, false, true);
 
         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
 
-        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', [
+        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', array_merge([
             'participants' => $this->publicParticipants($room, true),
             'phase' => Phase::Revealed,
             'roomId' => $room->id,
@@ -167,7 +200,8 @@ final class RoomController extends AbstractController
             'storyQueue' => $room->storyQueue,
             'storyTitle' => $room->getStoryTitle(),
             'recapRows' => $room->storyQueue->recapRows(),
-        ]);
+            'animateReveal' => true,
+        ], $this->moderatorActionContext($room)));
     }
 
     #[Route('/restart', name: 'restart', methods: ['POST'])]
@@ -191,7 +225,7 @@ final class RoomController extends AbstractController
 
         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
 
-        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', [
+        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', array_merge([
             'participants' => $this->publicParticipants($room),
             'phase' => $room->phase,
             'roomId' => $room->id,
@@ -202,7 +236,7 @@ final class RoomController extends AbstractController
             'storyQueue' => $room->storyQueue,
             'storyTitle' => $room->getStoryTitle(),
             'recapRows' => $room->storyQueue->recapRows(),
-        ]);
+        ], $this->moderatorActionContext($room)));
     }
 
     #[Route('/session/new', name: 'session_new', methods: ['POST'])]
@@ -223,11 +257,11 @@ final class RoomController extends AbstractController
         }
 
         $self = $room->findParticipant($participantId);
-        $this->publisher->publishSessionSync($room, false, null, true);
+        $this->publisher->publishSessionSync($room, false, null);
 
         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
 
-        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', [
+        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', array_merge([
             'participants' => $this->publicParticipants($room),
             'phase' => $room->phase,
             'roomId' => $room->id,
@@ -240,7 +274,7 @@ final class RoomController extends AbstractController
             'recapRows' => $room->storyQueue->recapRows(),
             'refreshQueueDrawer' => true,
             'isModerator' => null !== $self && $self->isModerator,
-        ]);
+        ], $this->moderatorActionContext($room)));
     }
 
     #[Route('/story', name: 'story', methods: ['POST'])]
@@ -322,14 +356,14 @@ final class RoomController extends AbstractController
     {
         $self = $room->findParticipant($participantId);
 
-        return $this->render('@SymfinityPokerPlanner/room/_story.stream.html.twig', [
+        return $this->render('@SymfinityPokerPlanner/room/_story.stream.html.twig', array_merge([
             'storyTitle' => $room->getStoryTitle(),
             'storyQueue' => $room->storyQueue,
             'roomId' => $room->id,
             'room' => $room,
             'phase' => $room->phase,
             'isModerator' => null !== $self && $self->isModerator,
-        ]);
+        ], $this->moderatorActionContext($room)));
     }
 
     #[Route('/rename', name: 'rename', methods: ['POST'])]
@@ -383,11 +417,13 @@ final class RoomController extends AbstractController
         }
 
         $consensus = Phase::Revealed === $room->phase ? $this->rooms->consensus($room) : null;
+        $finishedQueue = 0 === $room->storyQueue->count() && Phase::Revealed === $room->phase;
         $this->publisher->publishSessionSync($room, Phase::Revealed === $room->phase, $consensus);
 
+        $self = $room->findParticipant($participantId);
         $request->setRequestFormat(TurboBundle::STREAM_FORMAT);
 
-        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', [
+        return $this->render('@SymfinityPokerPlanner/room/_phase_change.stream.html.twig', array_merge([
             'participants' => $this->publicParticipants($room),
             'phase' => $room->phase,
             'roomId' => $room->id,
@@ -401,7 +437,9 @@ final class RoomController extends AbstractController
             'roundedMedianLabel' => null !== $consensus && $consensus->hasNumericConsensus()
                 ? $this->rooms->roundedMedianLabel($room)
                 : null,
-        ]);
+            'refreshQueueDrawer' => $finishedQueue || Phase::Voting === $room->phase,
+            'isModerator' => null !== $self && $self->isModerator,
+        ], $this->moderatorActionContext($room)));
     }
 
     #[Route('/settings', name: 'settings', methods: ['POST'])]
@@ -543,6 +581,22 @@ final class RoomController extends AbstractController
             'deckPresets' => DeckPreset::cases(),
             'roundingModes' => RoundingMode::cases(),
             'isModerator' => null !== $self && $self->isModerator,
+            'canRevealQuorum' => $room->hasRevealQuorum(),
+            'hasAnyVotes' => $room->hasAnyVotes(),
+        ];
+    }
+
+    /**
+     * @return array{roomId: string, phase: Phase, storyQueue: \Symfinity\Bundle\PokerPlanner\Model\StoryQueue, canRevealQuorum: bool, hasAnyVotes: bool}
+     */
+    private function moderatorActionContext(Room $room): array
+    {
+        return [
+            'roomId' => $room->id,
+            'phase' => $room->phase,
+            'storyQueue' => $room->storyQueue,
+            'canRevealQuorum' => $room->hasRevealQuorum(),
+            'hasAnyVotes' => $room->hasAnyVotes(),
         ];
     }
 

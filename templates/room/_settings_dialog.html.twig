@@ -1,4 +1,5 @@
 {% set scheme_labels = { auto: 'System', light: 'Light', dark: 'Dark' } %}
+{% set canEdit = isModerator|default(false) %}
 
 <dialog id="pp-settings-dialog" class="pp-dialog pp-dialog--wide">
     <header class="pp-dialog__header">
@@ -8,8 +9,11 @@
     <div class="pp-dialog__tabs" role="tablist" aria-label="Settings sections">
         <button type="button" class="pp-dialog__tab is-active" role="tab" aria-selected="true" data-settings-tab="me">Me</button>
         <button type="button" class="pp-dialog__tab" role="tab" aria-selected="false" data-settings-tab="game">Game</button>
-        <button type="button" class="pp-dialog__tab" role="tab" aria-selected="false" data-settings-tab="room">Room</button>
         <button type="button" class="pp-dialog__tab" role="tab" aria-selected="false" data-settings-tab="players">Players</button>
+        <button type="button" class="pp-dialog__tab" role="tab" aria-selected="false" data-settings-tab="session">Session</button>
+        {% if canEdit %}
+            <button type="button" class="pp-dialog__tab" role="tab" aria-selected="false" data-settings-tab="room">Room</button>
+        {% endif %}
     </div>
 
     <div class="pp-dialog__body">
@@ -42,22 +46,12 @@
             isModerator: isModerator,
         } %}
 
-        {% include '@SymfinityPokerPlanner/room/_settings_room_panel.html.twig' with {
-            room: room,
-            isModerator: isModerator,
-        } %}
-
         <section class="pp-settings-panel" data-settings-panel="players" role="tabpanel" hidden>
             <h3 class="pp-settings-panel__title">Room creator</h3>
             <ul class="pp-players-list">
                 {% for participant in roomParticipants %}
                     <li class="pp-players-list__item">
-                        <span class="pp-players-list__name">{{ participant.displayName }}</span>
-                        <span class="pp-players-list__role">
-                            {% if participant.isModerator %}
-                                <span class="pp-players-list__badge">Creator</span>
-                            {% endif %}
-                        </span>
+                        <span class="pp-players-list__name">{{ participant.displayName }}{% if participant.isModerator %}*{% endif %}</span>
                         <span class="pp-players-list__status">
                             {% if phase.value == 'revealed' and participant.voteLabel %}
                                 {{ participant.voteLabel }}
@@ -72,9 +66,17 @@
                     <li class="pp-players-list__empty">No players yet.</li>
                 {% endfor %}
             </ul>
-
-            <h3 class="pp-settings-panel__title">Session recap</h3>
-            {% include '@SymfinityPokerPlanner/room/_recap_panel.html.twig' with {recapRows: recapRows|default([]), compact: true} %}
         </section>
+
+        {% include '@SymfinityPokerPlanner/room/_settings_session_panel.html.twig' with {
+            recapRows: recapRows|default([]),
+        } %}
+
+        {% if canEdit %}
+            {% include '@SymfinityPokerPlanner/room/_settings_room_panel.html.twig' with {
+                room: room,
+                isModerator: isModerator,
+            } %}
+        {% endif %}
     </div>
 </dialog>

@@ -3,7 +3,7 @@
     <span class="pp-brand__title">Poker Planner</span>
     {% if inRoom|default(false) %}
         <span class="pp-brand__suffix" id="pp-brand-suffix">
-            {{ roomTitle|default('quick room') }}{% if not roomSaved|default(false) %}*{% endif %}
+            <span id="pp-brand-room-title">{{ roomTitle|default('quick room') }}</span>{% if showEphemeralMark|default(false) %}<span class="pp-brand__ephemeral" id="pp-brand-ephemeral" aria-label="Unsaved room">*</span>{% endif %}
         </span>
     {% endif %}
 </a>

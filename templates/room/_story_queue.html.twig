@@ -6,7 +6,7 @@
                 {% include '@SymfinityPokerPlanner/room/_story_queue_meta.html.twig' %}
             </header>
 
-            <div id="story-queue-list">
+            <div id="story-queue-list" class="pp-queue-drawer__list">
                 {% include '@SymfinityPokerPlanner/room/_story_queue_list.html.twig' with {
                     storyQueue: storyQueue,
                     roomId: roomId,
@@ -19,13 +19,6 @@
                 storyQueue: storyQueue,
                 isModerator: isModerator|default(false),
             } %}
-
-            {% if storyQueue.complete %}
-                <p class="pp-queue-drawer__complete">All stories have been estimated. </p>
-                <form method="post" action="{{ path('poker_planner_session_new', {uuid: roomId}) }}" data-turbo="true">
-                    <button type="submit" class="pp-btn pp-btn--primary">Add to recap</button>
-                </form>
-            {% endif %}
         </div>
 
         <button

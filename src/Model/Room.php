@@ -118,6 +118,38 @@ final class Room
         return null;
     }
 
+    public function participantCount(): int
+    {
+        return count($this->participants);
+    }
+
+    public function votedParticipantCount(): int
+    {
+        $count = 0;
+        foreach ($this->participants as $participant) {
+            if ($participant->hasVoted) {
+                ++$count;
+            }
+        }
+
+        return $count;
+    }
+
+    public function hasRevealQuorum(): bool
+    {
+        $total = $this->participantCount();
+        if ($total === 0) {
+            return false;
+        }
+
+        return $this->votedParticipantCount() * 2 >= $total;
+    }
+
+    public function hasAnyVotes(): bool
+    {
+        return $this->votedParticipantCount() > 0;
+    }
+
     public function touch(int $now): void
     {
         $this->lastActivityAt = $now;

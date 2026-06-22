@@ -1,4 +1,22 @@
 {% include '@SymfinityPokerPlanner/room/_session_sync.stream.html.twig' %}
+{% if refreshQueueDrawer|default(false) %}
+<turbo-stream action="replace" target="story-queue-drawer">
+    <template>
+        {% include '@SymfinityPokerPlanner/room/_story_queue.html.twig' with {
+            roomId: roomId,
+            storyTitle: storyTitle,
+            storyQueue: storyQueue,
+            isModerator: isModerator|default(false),
+        } %}
+    </template>
+</turbo-stream>
+{% endif %}
 {% if includeModeratorActions %}
-    {% include '@SymfinityPokerPlanner/room/_moderator_actions.stream.html.twig' %}
+    {% include '@SymfinityPokerPlanner/room/_moderator_actions.stream.html.twig' with {
+        roomId: roomId,
+        phase: phase,
+        storyQueue: storyQueue,
+        canRevealQuorum: canRevealQuorum|default(false),
+        hasAnyVotes: hasAnyVotes|default(false),
+    } %}
 {% endif %}

@@ -24,6 +24,8 @@
             {% endif %}
         </li>
     {% else %}
-        <li class="pp-queue-list__empty">No stories queued yet.</li>
+        {% if not storyQueue.complete %}
+            <li class="pp-queue-list__empty">No stories queued yet.</li>
+        {% endif %}
     {% endfor %}
 </ol>

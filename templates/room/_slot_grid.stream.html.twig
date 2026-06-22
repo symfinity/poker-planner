@@ -3,3 +3,12 @@
         {% include '@SymfinityPokerPlanner/room/_slot_grid.html.twig' %}
     </template>
 </turbo-stream>
+{% if refreshModeratorActions|default(false) %}
+    {% include '@SymfinityPokerPlanner/room/_moderator_actions.stream.html.twig' with {
+        roomId: roomId,
+        phase: phase,
+        storyQueue: storyQueue,
+        canRevealQuorum: canRevealQuorum|default(false),
+        hasAnyVotes: hasAnyVotes|default(false),
+    } %}
+{% endif %}

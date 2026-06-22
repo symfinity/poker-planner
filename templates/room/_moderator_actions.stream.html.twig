@@ -1,5 +1,11 @@
 <turbo-stream action="replace" target="moderator-actions">
     <template>
-        {% include '@SymfinityPokerPlanner/room/_moderator_actions.html.twig' %}
+        {% include '@SymfinityPokerPlanner/room/_moderator_actions.html.twig' with {
+            roomId: roomId,
+            phase: phase,
+            storyQueue: storyQueue,
+            canRevealQuorum: canRevealQuorum|default(false),
+            hasAnyVotes: hasAnyVotes|default(false),
+        } %}
     </template>
 </turbo-stream>
