@@ -178,12 +178,6 @@ Copied by the recipe. Required Stimulus controllers:
                 "fetch": "eager"
             }
         },
-        "@symfinity/ux-blocks-interactive": {
-            "scheme-switch": {
-                "enabled": true,
-                "fetch": "eager"
-            }
-        },
         "@symfinity/poker-planner": {
             "poker-planner": {
                 "enabled": true,
@@ -198,7 +192,7 @@ Copied by the recipe. Required Stimulus controllers:
 | Controller | Why |
 |------------|-----|
 | `turbo-core` + Mercure autoimport | Subscribes to room topics via `turbo_stream_from()` |
-| `scheme-switch` | Theme switcher in poker-planner layout |
+| `scheme-switch` | Theme switcher in poker-planner layout (optional Stimulus controller when present in your asset map) |
 | `poker-planner` | Heartbeat, share link, queue drawer, confetti |
 
 ---
