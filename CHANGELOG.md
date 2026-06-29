@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-06-29
+
+### Added
+
+- Public `ROADMAP.md` with 0.1.x–1.0.x milestone table
+- `SUPPORTERS.md` and `.github/FUNDING.yml` for GitHub Sponsors visibility
+- `composer.json` `funding` metadata pointing to [GitHub Sponsors](https://github.com/sponsors/serotoninja)
+
+### Changed
+
+- **Flex recipe handbook** — `scheme-switch` documented as optional when present in your asset map; manifest example no longer requires `symfinity/ux-blocks-interactive`
+- **Split mirror CI** — Composer package cache and `COMPOSER_AUTH` for reliable dependency installs across the PHP × Symfony matrix
+
+### Notes
+
+- No functional or API changes — documentation, sponsorship metadata, and CI hygiene
+
 ## [0.1.1] - 2026-06-22
 
 ### Added

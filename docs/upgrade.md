@@ -1,5 +1,21 @@
 # Upgrade
 
+## 0.1.2
+
+Patch release — public roadmap, sponsorship metadata, Flex handbook clarification, and split-mirror CI hygiene.
+
+```bash
+composer update symfinity/poker-planner
+```
+
+### Highlights
+
+- **ROADMAP.md** — public 0.1.x–1.0.x milestone table on the split mirror
+- **Flex recipe docs** — theme `scheme-switch` is optional; no hard `ux-blocks-interactive` requirement in the handbook example
+- **CI** — Composer cache and GitHub token auth for reliable matrix installs
+
+No config, recipe, or Redis room document changes. Upgrading from 0.1.1 is documentation and metadata only.
+
 ## 0.1.1
 
 Patch release — reveal quorum, moderator button states, session recap tab, and story-queue finish behaviour.

@@ -75,6 +75,12 @@
         "predis/predis": "Pure-PHP Redis client when ext-redis is unavailable",
         "symfony/ux-icons": "App icon and optional glyphs via ux_blocks_icon() (hugeicons:joker)"
     },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/serotoninja"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
