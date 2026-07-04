@@ -1,5 +1,21 @@
 # Upgrade
 
+## 0.1.3
+
+Patch release — OOTB verification handbook, integration profile metadata, and split-mirror PHPUnit bootstrap.
+
+```bash
+composer update symfinity/poker-planner
+```
+
+### Highlights
+
+- **Verification** — [verification.md](verification.md) documents P1 clean-app smoke (`GET /`, `/r/{uuid}`) with Redis + Mercure running
+- **Handbook index** — `integration_profile: P1` frontmatter for consumer experience tooling
+- **PHPUnit bootstrap** — monorepo and split mirror both resolve Composer autoload reliably
+
+No config, Flex recipe, or Redis room document changes. Upgrading from 0.1.2 is documentation and test harness only.
+
 ## 0.1.2
 
 Patch release — public roadmap, sponsorship metadata, Flex handbook clarification, and split-mirror CI hygiene.

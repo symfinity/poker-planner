@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-07-05
+
+### Added
+
+- Handbook [Verification](docs/verification.md) — P1 integration profile, clean-app smoke (`composer require`, `GET /`, share link `/r/{uuid}`)
+- `integration_profile: P1` frontmatter on handbook index (OOTB consumer experience)
+
+### Changed
+
+- PHPUnit bootstrap: `tests/bootstrap.php` resolves monorepo or split-mirror Composer autoload (split CI parity)
+
+### Notes
+
+- No functional or API changes — OOTB documentation and test bootstrap hygiene
+- Requires Redis and Mercure for clean-app smoke — see [Installation](docs/installation.md)
+
 ## [0.1.2] - 2026-06-29
 
 ### Added

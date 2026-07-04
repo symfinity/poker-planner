@@ -2,20 +2,30 @@
 
 declare(strict_types=1);
 
-$monorepoVendor = dirname(__DIR__, 2).'/vendor/autoload.php';
-if (is_file($monorepoVendor)) {
-    require $monorepoVendor;
+/**
+ * PHPUnit bootstrap — single Composer autoload only.
+ *
+ * Monorepo: project-root vendor (mono qa:test). Split mirror: package vendor only.
+ *
+ * Optional package hook: tests/bootstrap.local.php (KERNEL_CLASS, Dotenv, …).
+ */
+
+$packageRoot = dirname(__DIR__);
+$monorepoRoot = dirname($packageRoot, 2);
+$monorepoAutoload = $monorepoRoot.'/vendor/autoload.php';
+
+if (is_file($monorepoRoot.'/mono.json') && is_file($monorepoAutoload)) {
+    if (!class_exists(\Composer\Autoload\ClassLoader::class, false)) {
+        require $monorepoAutoload;
+    }
+} elseif (is_file($packageRoot.'/vendor/autoload.php')) {
+    require $packageRoot.'/vendor/autoload.php';
+} else {
+    fwrite(STDERR, "Composer autoload not found — run composer install in the package or monorepo.\n");
+    exit(1);
 }
 
-spl_autoload_register(static function (string $class): void {
-    $prefix = 'Symfinity\\Bundle\\PokerPlanner\\';
-    if (!str_starts_with($class, $prefix)) {
-        return;
-    }
-
-    $relative = substr($class, strlen($prefix));
-    $path = dirname(__DIR__).'/src/'.str_replace('\\', '/', $relative).'.php';
-    if (is_file($path)) {
-        require $path;
-    }
-});
+$localBootstrap = __DIR__.'/bootstrap.local.php';
+if (is_file($localBootstrap)) {
+    require $localBootstrap;
+}
