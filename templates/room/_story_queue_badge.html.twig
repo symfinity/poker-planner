@@ -1,0 +1,7 @@
+{% set queueCount = storyQueue.count %}
+<span
+    id="story-queue-count"
+    class="pp-queue-drawer__count"
+    {% if queueCount == 0 %}hidden{% endif %}
+    aria-hidden="{{ queueCount == 0 ? 'true' : 'false' }}"
+>{{ queueCount > 0 ? queueCount : '' }}</span>

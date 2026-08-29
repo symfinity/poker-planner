@@ -1,0 +1,6 @@
+# Host routes required by poker-planner (ui-kernel scheme switcher).
+poker_planner_host:
+    resource: poker_planner_host.yaml
+
+poker_planner:
+    resource: '@PokerPlannerBundle/config/routes.yaml'

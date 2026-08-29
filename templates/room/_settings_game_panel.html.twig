@@ -1,0 +1,84 @@
+{% set settings = room.settings %}
+{% set canEdit = isModerator|default(false) %}
+
+<section class="pp-settings-panel" data-settings-panel="game" role="tabpanel" hidden>
+    {% if canEdit %}
+        <form method="post" action="{{ path('poker_planner_settings', {uuid: room.id}) }}" class="pp-settings-form pp-settings-form--game" data-game-settings-form>
+            <h3 class="pp-settings-panel__title">Deck</h3>
+            <div class="pp-deck-picker">
+                {% for preset in deckPresets %}
+                    <label class="pp-deck-picker__option">
+                        <input
+                            type="radio"
+                            name="deck_preset"
+                            value="{{ preset.value }}"
+                            class="pp-sr-only"
+                            {% if settings.deckPreset == preset %}checked{% endif %}
+                        >
+                        <span class="pp-deck-picker__label">{{ preset.label() }}</span>
+                        <span class="pp-deck-picker__preview" aria-hidden="true">
+                            {% for card in preset.baseCards() %}
+                                {% include '@SymfinityPokerPlanner/_card_face.html.twig' with {card: card, size: 'mini'} %}
+                            {% endfor %}
+                        </span>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <h3 class="pp-settings-panel__title">Optional cards</h3>
+            <div class="pp-option-cards">
+                <label class="pp-option-card">
+                    <input type="checkbox" class="pp-sr-only" name="optional_zero" value="1"{% if settings.optionalZero %} checked{% endif %}>
+                    {% include '@SymfinityPokerPlanner/_card_face.html.twig' with {
+                        card: constant('Symfinity\\Bundle\\PokerPlanner\\Model\\CardValue::Zero'),
+                        size: 'selectable',
+                        selectable: true,
+                    } %}
+                    <span class="pp-option-card__label">Zero</span>
+                </label>
+                <label class="pp-option-card">
+                    <input type="checkbox" class="pp-sr-only" name="optional_pass" value="1"{% if settings.optionalPass %} checked{% endif %}>
+                    {% include '@SymfinityPokerPlanner/_card_face.html.twig' with {
+                        card: constant('Symfinity\\Bundle\\PokerPlanner\\Model\\CardValue::Pass'),
+                        size: 'selectable',
+                        selectable: true,
+                    } %}
+                    <span class="pp-option-card__label">Pass</span>
+                </label>
+                <label class="pp-option-card">
+                    <input type="checkbox" class="pp-sr-only" name="optional_break" value="1"{% if settings.optionalBreak %} checked{% endif %}>
+                    {% include '@SymfinityPokerPlanner/_card_face.html.twig' with {
+                        card: constant('Symfinity\\Bundle\\PokerPlanner\\Model\\CardValue::Break'),
+                        size: 'selectable',
+                        selectable: true,
+                    } %}
+                    <span class="pp-option-card__label">Break</span>
+                </label>
+            </div>
+
+            <h3 class="pp-settings-panel__title">Rounding</h3>
+            <div class="pp-scheme-segment" role="group" aria-label="Rounding mode">
+                {% for mode in roundingModes %}
+                    <label class="pp-scheme-segment__btn{% if settings.roundingMode == mode %} is-active{% endif %}">
+                        <input type="radio" name="rounding_mode" value="{{ mode.value }}" class="pp-sr-only"{% if settings.roundingMode == mode %} checked{% endif %}>
+                        {{ mode.label() }}
+                    </label>
+                {% endfor %}
+            </div>
+
+            <h3 class="pp-settings-panel__title">Other settings</h3>
+            <label class="pp-settings-check">
+                <input type="checkbox" name="allow_change_after_reveal" value="1"{% if settings.allowChangeAfterReveal %} checked{% endif %}>
+                Allow cards to be changed after revealing
+            </label>
+            <label class="pp-settings-check">
+                <input type="checkbox" name="show_confetti" value="1"{% if settings.showConfetti %} checked{% endif %}>
+                Show confetti
+            </label>
+
+            <button type="submit" class="pp-corner-btn pp-corner-btn--solid pp-corner-btn--block">Apply game settings</button>
+        </form>
+    {% else %}
+        <p class="pp-dialog__hint">Only the room creator can change game settings.</p>
+    {% endif %}
+</section>

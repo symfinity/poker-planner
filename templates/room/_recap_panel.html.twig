@@ -1,0 +1,32 @@
+<section id="recap-panel" class="pp-recap{% if compact|default(false) %} pp-recap--compact{% endif %}">
+    {% if not compact|default(false) %}
+        <header class="pp-recap__header">
+            <h2 class="pp-recap__title">Session recap</h2>
+            <button type="button" class="pp-corner-btn pp-recap__copy" data-recap-copy>Copy markdown</button>
+            <p id="recap-copy-status" class="pp-sr-only" aria-live="polite"></p>
+        </header>
+    {% endif %}
+
+    {% if recapRows is empty %}
+        <p class="pp-recap__empty">Completed stories will appear here after you advance the queue.</p>
+    {% else %}
+        <table class="pp-recap__table">
+            <thead>
+                <tr>
+                    <th scope="col">Story</th>
+                    <th scope="col">Estimate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in recapRows %}
+                    <tr>
+                        <td>{{ row.title }}</td>
+                        <td>{{ row.estimate }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <textarea id="recap-markdown" class="pp-sr-only" readonly aria-hidden="true">{% for row in recapRows %}| {{ row.title }} | {{ row.estimate }} |
+{% endfor %}</textarea>
+    {% endif %}
+</section>

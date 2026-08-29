@@ -1,0 +1,14 @@
+{% set settings = room.settings %}
+{% set canEdit = isModerator|default(false) %}
+
+<section class="pp-settings-panel pp-settings-danger" data-settings-panel="room" role="tabpanel" hidden>
+    <h3 class="pp-settings-panel__title">Danger Zone</h3>
+    <form
+        method="post"
+        action="{{ path('poker_planner_delete_room', {uuid: room.id}) }}"
+        class="pp-settings-form pp-settings-form--danger"
+        onsubmit="return confirm('Delete this room for everyone?');"
+    >
+        <button type="submit" class="pp-corner-btn pp-corner-btn--danger pp-corner-btn--block">Delete room</button>
+    </form>
+</section>

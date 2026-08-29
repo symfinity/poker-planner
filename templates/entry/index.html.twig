@@ -1,0 +1,32 @@
+{% extends '@SymfinityPokerPlanner/base.html.twig' %}
+
+{% block title %}Poker Planner{% endblock %}
+
+{% block body %}
+<main class="pp-entry pp-entry--splash">
+    <div class="pp-corner pp-corner--br">
+        <button type="button" class="pp-corner-btn pp-corner-btn--icon" data-dialog-open="pp-about-dialog" aria-label="About Poker Planner">@</button>
+    </div>
+
+    <div class="pp-entry__stack">
+        <div class="pp-entry__title-row">
+            <span class="pp-entry__icon" aria-hidden="true">{{ ux_blocks_icon('hugeicons:joker') }}</span>
+            <h1 class="pp-entry__brand">Poker Planner</h1>
+        </div>
+        <div class="pp-entry__actions pp-entry__actions--delayed">
+            <button type="button" class="pp-corner-btn pp-corner-btn--solid pp-entry__start" data-dialog-open="pp-start-dialog">Start</button>
+        </div>
+    </div>
+
+    <p
+        id="pp-room-gone-banner"
+        class="pp-flash pp-flash--warning pp-entry__flash"
+        role="status"
+        hidden
+        data-message="This room is no longer available. Start a new session or ask for an updated link."
+    ></p>
+
+    {% include '@SymfinityPokerPlanner/_start_dialog.html.twig' %}
+    {% include '@SymfinityPokerPlanner/_about_dialog.html.twig' %}
+</main>
+{% endblock %}

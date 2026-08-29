@@ -1,0 +1,12 @@
+{
+    "name": "@symfinity/poker-planner",
+    "symfony": {
+        "controllers": {
+            "poker-planner": {
+                "main": "controllers/poker_planner/poker_planner_controller.js",
+                "fetch": "eager",
+                "enabled": true
+            }
+        }
+    }
+}

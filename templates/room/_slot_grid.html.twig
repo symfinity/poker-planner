@@ -1,0 +1,31 @@
+<div id="slot-grid" class="pp-slot-grid{% if phase.value == 'revealed' %} pp-slot-grid--revealed{% endif %}">
+    {% for participant in participants %}
+        {% set isOutlier = consensus is defined and consensus and participant.id in consensus.outlierParticipantIds %}
+        <article class="pp-slot{% if participant.hasVoted %} pp-slot--voted{% endif %}{% if phase.value == 'revealed' %} pp-slot--revealed{% endif %}{% if isOutlier %} pp-slot--outlier{% endif %}" data-participant-id="{{ participant.id }}">
+            <header class="pp-slot__name">{{ participant.displayName }}{% if participant.isModerator %}*{% endif %}</header>
+            <div class="pp-slot__card">
+                <div class="pp-slot__card-inner{% if phase.value == 'revealed' %} pp-slot__card-inner--{% if animateReveal|default(false) and participant.voteLabel %}animate{% else %}flipped{% endif %}{% endif %}">
+                    <div class="pp-slot__card-face pp-slot__card-face--back">
+                        <div class="pp-slot__card-shell pp-slot__card-shell--back">
+                            {% if not participant.hasVoted %}
+                                <span class="pp-slot__waiting" aria-hidden="true">…</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="pp-slot__card-face pp-slot__card-face--front">
+                        <div class="pp-slot__card-shell pp-card-accent--{{ participant.voteAccent ?? 'grey' }}">
+                            {% if participant.voteIcon %}
+                                <span class="pp-slot__value pp-slot__value--icon">{% include '@SymfinityPokerPlanner/_card_icon.html.twig' with {icon: participant.voteIcon} %}</span>
+                            {% elseif participant.voteLabel %}
+                                <span class="pp-slot__value">{{ participant.voteLabel }}</span>
+                            {% elseif phase.value == 'revealed' %}
+                                <span class="pp-slot__waiting" aria-hidden="true">–</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <span class="pp-slot__badge" aria-hidden="true">{{ participant.displayName|slice(0, 2)|upper }}</span>
+        </article>
+    {% endfor %}
+</div>

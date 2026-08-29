@@ -1,0 +1,11 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+
+parameters:
+    level: max
+    paths:
+        - src
+    excludePaths:
+        # Optional fallback when ext-redis is absent and predis/predis is installed.
+        - src/Storage/PredisRedisClient.php
+    reportUnmatchedIgnoredErrors: false
