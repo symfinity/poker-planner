@@ -27,7 +27,7 @@
     "require": {
         "php": ">=8.2",
         "ext-json": "*",
-        "symfinity/ui-kernel": "^0.1",
+        "symfinity/ui-kernel": "^0.3",
         "symfinity/ux-blocks": "^0.1",
         "symfinity/ux-blocks-core": "^0.1",
         "symfony/config": "^7.4||^8.0",
