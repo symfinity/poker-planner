@@ -1,5 +1,13 @@
 # Upgrade
 
+## 0.2.0
+
+Runtime requirement `symfinity/ui-kernel` is now `^0.3`. Apps locked to 0.1 or 0.2 need that package updated before this release installs. `symfinity/ux-blocks` and `symfinity/ux-blocks-core` stay `^0.1`. Config, Redis room documents, and the Flex recipe are unchanged.
+
+```bash
+composer update symfinity/poker-planner symfinity/ui-kernel
+```
+
 ## 0.1.3
 
 Patch release — OOTB verification handbook, integration profile metadata, and split-mirror PHPUnit bootstrap.
